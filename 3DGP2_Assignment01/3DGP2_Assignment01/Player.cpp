@@ -832,7 +832,8 @@ void CTankPlayer::UpdateTankPosition(float fTimeElapsed)
 		}
 		else {
 			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
-			xmf3PlayerPosition.y = fHeight;
+			xmf3PlayerPosition.y = fHeight+3.0f;
+			Float_in_Water = false;
 		}
 		SetPosition(xmf3PlayerPosition);
 	}
@@ -882,6 +883,7 @@ void CTankPlayer::FloatEffect(float fTimeElapsed)
 		if (FloatEffectTimeElapsed >= 2 * FloatUpDuration)
 		{
 			FloatEffectTimeElapsed = 0.0f;
+			
 		}
 	
 }

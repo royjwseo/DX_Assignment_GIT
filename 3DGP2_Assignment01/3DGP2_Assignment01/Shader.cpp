@@ -1314,7 +1314,7 @@ CTankObjectsShader::~CTankObjectsShader()
 
 void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nTanks = 1;
+	m_nTanks = 3;
 	m_ppTankObjects = new CGameObject * [m_nTanks];
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);  //탱크 텍스쳐 5개
@@ -1322,13 +1322,15 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	CGameObject* pTankObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/EnemyTank.bin", this);
 
 	for (int i = 0; i < m_nTanks; i++) {
-		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,pContext);
 		m_ppTankObjects[i]->SetChild(pTankObject);
 		pTankObject->AddRef();
 		m_ppTankObjects[i]->SetOOBB(9.0, 6.0f, 19.0);
 		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 		m_ppTankObjects[i]->SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f+100*i, 260.0f, pTerrain->GetLength() * 0.5f));
-	
+		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f*(i+1));
+		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingSpeed(-5.0f * (i + 1));
+		static_cast<CTankObject*>(m_ppTankObjects[i])->SetRotationSpeed(0.5f * (i + 1));
 
 	/*	m_pPlayerShader = new CBulletsShader();
 		((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
@@ -1343,6 +1345,9 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 void CTankObjectsShader::AnimateObjects(float fTimeElapsed)
 {
+	for (int i = 0; i < m_nTanks; i++) {
+		if (m_ppTankObjects[i])m_ppTankObjects[i]->Animate(fTimeElapsed);
+	}
 }
 
 void CTankObjectsShader::ReleaseObjects()

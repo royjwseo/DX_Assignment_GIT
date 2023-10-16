@@ -490,15 +490,45 @@ public:
 class CTankObject : public CGameObject
 {
 public:
-	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,void* pContext);
 	virtual ~CTankObject();
 
 private:
+	int m_nWheels = 16;
 	array<CGameObject*, 16> m_pWheel{};
 	CGameObject* m_pTurret = NULL;
 	CGameObject* m_pPoshin = NULL;
+	
+	// Terrain 저장 변수
+	LPVOID						m_pTankObjectUpdatedContext = NULL;
+
+	//이동하면서 회전 판단 bool
+	bool Turning_Direction = false;// 바퀴 돌리는 방향 바꾸기 위함.
+	float MoveStrafeTimeElapsed = 0.f;
+	float MoveStrafeDuration = 5.f;
+	float MovingSpeed = 5.f;
+	float RotationSpeed = 1.5f;
+
+	// 물 위에 뜨기 위한 변수들
+	bool Float_in_Water = false;
+	float FloatEffectTimeElapsed = 0.f;
+	float FloatUpDuration = 0.5f;
 
 public:
+	//Terrain 받아오는 함수
+	void SetPlayerUpdatedContext(LPVOID pContext) { m_pTankObjectUpdatedContext = pContext; }
+	
+	//--
+	void MoveRandom(float fTimeElapsed);
+	void RotateWheels(float fTimeElapsed);
+	void SetMovingDuration(float Duration) { MoveStrafeDuration = Duration; }
+	void SetMovingSpeed(float mSpeed) { MovingSpeed = mSpeed; }
+	void SetRotationSpeed(float rSpeed) { RotationSpeed = rSpeed; }
+	//탱크 물 위에 뜨기 위한 함수
+	void FloatEffect(float fTimeElapsed);
+
+	void Update(float fTimeElapsed);
+	void UpdateTankPosition(float fTimeElapsed);
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

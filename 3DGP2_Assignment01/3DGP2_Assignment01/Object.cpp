@@ -1399,14 +1399,118 @@ CRippleWater::~CRippleWater()
 {
 }
 
-CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
+CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,void *pContext) : CGameObject(0, 0)
 {
-
+	SetPlayerUpdatedContext(pContext);
 }
 
 CTankObject::~CTankObject() {
 
 }
+
+void CTankObject::Update(float fTimeElapsed)
+{
+	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
+	MoveRandom(fTimeElapsed);
+	
+	RotateWheels(fTimeElapsed);
+	if (m_pTankObjectUpdatedContext) {
+		UpdateTankPosition(fTimeElapsed);
+	}
+	if (Float_in_Water)
+		FloatEffect(fTimeElapsed);
+	
+}
+
+void CTankObject::UpdateTankPosition(float fTimeElapsed)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
+	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+	XMFLOAT3 xmf3TankPosition = GetPosition();
+	int z = (int)(xmf3TankPosition.z / xmf3Scale.z);
+	bool bReverseQuad = ((z % 2) != 0);
+	float fHeight = pTerrain->GetHeight(xmf3TankPosition.x, xmf3TankPosition.z, bReverseQuad) + 6.0f;
+	if(fHeight>179.0f)MoveUp(-0.5f);
+	if (xmf3TankPosition.y < fHeight)
+	{
+		
+		if (fHeight < 180.0f) {
+			
+			Float_in_Water = true;
+		}
+		else {
+			Float_in_Water = false;
+			xmf3TankPosition.y = fHeight-3.0f;
+		}
+		SetPosition(xmf3TankPosition);
+	}
+}
+
+//std::random_device rd;
+//std::mt19937 mt(rd());
+//std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // -1.0에서 1.0 사이의 랜덤 수 생성
+
+void CTankObject::MoveRandom(float fTimeElapsed)
+{
+	float fDistance = 5.f; 
+
+	// 랜덤 방향으로 이동
+	//float fRandX = dist(mt);//-1~1사이
+	//float fRandZ = dist(mt);
+	MoveStrafeTimeElapsed += fTimeElapsed;
+	if (MoveStrafeTimeElapsed < MoveStrafeDuration) {
+		MoveForward(MovingSpeed * fTimeElapsed);
+	}
+	else if (MoveStrafeTimeElapsed < 1.3 * MoveStrafeDuration)
+	{
+		Turning_Direction = true;
+		Rotate(0.f, RotationSpeed, 0.f);
+		
+	}
+	if (MoveStrafeTimeElapsed >= 1.3 * MoveStrafeDuration)
+	{
+		Turning_Direction = false;
+		MoveStrafeTimeElapsed = 0.0f;
+	}
+	
+
+	//if(!Turning_Direction)
+
+}
+
+void CTankObject::RotateWheels(float fTimeElapsed)
+{
+	for (int i = 0; i < m_nWheels; ++i) {
+		if (!Turning_Direction) {
+			XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(180.0f * 2.0f) * fTimeElapsed);
+			m_pWheel[i]->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pWheel[i]->m_xmf4x4Transform);
+		}
+		else {
+			XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(-240.0f * 2.0f) * fTimeElapsed);
+			m_pWheel[i]->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pWheel[i]->m_xmf4x4Transform);
+		}
+	}
+}
+
+void CTankObject::FloatEffect(float fTimeElapsed)
+{
+
+	FloatEffectTimeElapsed += fTimeElapsed;
+	if (FloatEffectTimeElapsed < FloatUpDuration) {
+		MoveUp(0.1);
+	}
+	else if (FloatEffectTimeElapsed < 2 * FloatUpDuration)
+	{
+		MoveUp(-0.1);
+
+	}
+	if (FloatEffectTimeElapsed >= 2 * FloatUpDuration)
+	{
+		FloatEffectTimeElapsed = 0.0f;
+	}
+
+}
+
 
 void CTankObject::PrepareAnimate() {
 	m_pWheel[0] = FindFrame("Cube.000");
@@ -1428,9 +1532,11 @@ void CTankObject::PrepareAnimate() {
 	m_pTurret = FindFrame("Cube.017");
 	m_pPoshin = FindFrame("Cube.018");
 }
+
+
 void CTankObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
-
+	Update(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 //==================================================
