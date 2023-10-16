@@ -207,9 +207,7 @@ public:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
-	void DieEffect();
-	bool die = false;
-	bool hitByBullet = false;
+	
 
 	bool Cactus_hit = false;
 
@@ -417,14 +415,18 @@ public:
 	virtual ~CBulletObject();
 
 public:
-	virtual void Animate(float fElapsedTime);
+	virtual void Animate(float fElapsedTime, void* pContext);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 400.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
 	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
+
+
 	bool Collided = false;
+	float CollideLockingTime = 0.0f;
+
 	float						m_fElapsedTimeAfterFire = 0.0f;
 	float						m_fLockingDelayTime = 0.3f;
 	float						m_fLockingTime = 5.0f;
@@ -515,6 +517,10 @@ private:
 	float FloatUpDuration = 0.5f;
 
 public:
+	bool die = false;
+	bool hitByBullet = false;
+
+public:
 	//Terrain 받아오는 함수
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pTankObjectUpdatedContext = pContext; }
 	
@@ -526,6 +532,7 @@ public:
 	void SetRotationSpeed(float rSpeed) { RotationSpeed = rSpeed; }
 	//탱크 물 위에 뜨기 위한 함수
 	void FloatEffect(float fTimeElapsed);
+	void DieEffect();
 
 	void Update(float fTimeElapsed);
 	void UpdateTankPosition(float fTimeElapsed);
@@ -542,7 +549,7 @@ public:
 
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;
-
+	
 
 	ID3D12Resource* m_pd3dcbObjectTexture = NULL;
 	XMFLOAT4X4* m_pcbMappedObjectTexture = NULL;

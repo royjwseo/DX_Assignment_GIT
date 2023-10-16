@@ -551,7 +551,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 
 
-	for (int j = 0; j < m_nObjects; j++) {
+	/*for (int j = 0; j < m_nObjects; j++) {
 
 
 		if (m_ppObjects[j]->hitByBullet) {
@@ -573,7 +573,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 				ShakeEffect(j, fTimeElapsed);
 			}
 		}
-	}
+	}*/
 
 	/*for (int j = 0; j < m_nObjects; j++) {
 		m_ppObjects[j]->Animate(fTimeElapsed);
@@ -619,31 +619,31 @@ void CObjectsShader::ShakeEffect(int j, float fTimeElapsed)
 void CObjectsShader::HitEffect(int j, float fTimeElapsed)
 {
 
-	HitEffectTimeElapsed += fTimeElapsed;
-	if (HitEffectTimeElapsed < HitRotationDuration) {
-		//m_ppObjects[j]->isHit = 0.6;
-		m_ppObjects[j]->Rotate(0.0f, 0.f, 120.0f * fTimeElapsed);
-	}
-	else if (HitEffectTimeElapsed < 3 * HitRotationDuration)
-	{
-		// 두 번째 회전
+	//HitEffectTimeElapsed += fTimeElapsed;
+	//if (HitEffectTimeElapsed < HitRotationDuration) {
+	//	//m_ppObjects[j]->isHit = 0.6;
+	//	m_ppObjects[j]->Rotate(0.0f, 0.f, 120.0f * fTimeElapsed);
+	//}
+	//else if (HitEffectTimeElapsed < 3 * HitRotationDuration)
+	//{
+	//	// 두 번째 회전
 
 
-		m_ppObjects[j]->Rotate(0.0f, 0.0f, -120.0f * fTimeElapsed);
-	}
-	else
-	{
-		// 세 번째 회전
-		m_ppObjects[j]->Rotate(0.0f, 0.0f, 120.0f * fTimeElapsed);
-	}
+	//	m_ppObjects[j]->Rotate(0.0f, 0.0f, -120.0f * fTimeElapsed);
+	//}
+	//else
+	//{
+	//	// 세 번째 회전
+	//	m_ppObjects[j]->Rotate(0.0f, 0.0f, 120.0f * fTimeElapsed);
+	//}
 
-	// 회전 시간이 경과하면 초기화
-	if (HitEffectTimeElapsed >= 4 * HitRotationDuration)
-	{
-		HitEffectTimeElapsed = 0.0f;
-		m_ppObjects[j]->hitByBullet = false;
+	//// 회전 시간이 경과하면 초기화
+	//if (HitEffectTimeElapsed >= 4 * HitRotationDuration)
+	//{
+	//	HitEffectTimeElapsed = 0.0f;
+	//	m_ppObjects[j]->hitByBullet = false;
 
-	}
+	//}
 
 }
 
@@ -865,7 +865,7 @@ void CBulletsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		pBulletMesh->AddRef();
 		//pBulletMesh->SetScale(2., 2., 2.);
 	//	m_ppBullets[i]->SetScale(0.1, 0.1, 0.1);
-		m_ppBullets[i]->SetOOBB(3, 3, 8);
+		m_ppBullets[i]->SetOOBB(6, 6, 16);
 		m_ppBullets[i]->SetMovingSpeed(50.0f);
 		m_ppBullets[i]->UpdateTransform(NULL);
 		m_ppBullets[i]->SetActive(false);
@@ -873,7 +873,7 @@ void CBulletsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 
 	}
-
+	m_pContextforAnimation = pContext;
 }
 
 
@@ -903,7 +903,7 @@ void CBulletsShader::AnimateObjects(float fTimeElapsed)
 		if (m_ppBullets[i]->m_bActive) {
 			All_nonActive = false;
 			m_ppBullets[i]->Rotate(&Axis, 360.0f * fTimeElapsed);
-			m_ppBullets[i]->Animate(fTimeElapsed);
+			m_ppBullets[i]->Animate(fTimeElapsed, m_pContextforAnimation);
 
 		}
 
@@ -932,9 +932,12 @@ void CBulletsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) { 
+	for (int i = 0; i < BULLETS; i++) {
 		m_ppBullets[i]->UpdateTransform(NULL);
-		m_ppBullets[i]->Render(pd3dCommandList, pCamera);
+		if (m_ppBullets[i]->m_bActive&&!m_ppBullets[i]->Collided) {
+			
+			m_ppBullets[i]->Render(pd3dCommandList, pCamera);
+		}
 	}
 }
 

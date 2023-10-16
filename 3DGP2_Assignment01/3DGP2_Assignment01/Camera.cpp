@@ -350,7 +350,7 @@ void CThirdPersonCamera::UpdateByBullet(XMFLOAT3& xmf3LookAt, float fTimeElapsed
 		float fDistance = fLength * fTimeLagScale;
 		if (fDistance > fLength) fDistance = fLength;
 		if (fLength < 0.01f) fDistance = fLength;
-		if (fDistance > 0)
+		if (fDistance > 0&&!pBulletShader->m_ppBullets[0]->Collided)
 		{
 			
 			m_xmf3Position.y += 30.0f*fTimeElapsed;

@@ -522,7 +522,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
 	((CBulletsShader*)m_pPlayerShader)->m_pCamera = m_pCamera;
 	m_pPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL);
+	m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
 
 
 	PrepareAnimate();
@@ -595,7 +595,7 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
 		}
 	}
-	if (Fired_Bullet && !is_Going && !is_RotateWheel) {
+	if (Fired_Bullet && !is_Going ) {
 		FireEffect(fTimeElapsed);
 	}
 	if (Shake) {
@@ -833,7 +833,7 @@ void CTankPlayer::UpdateTankPosition(float fTimeElapsed)
 		else {
 			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
 			xmf3PlayerPosition.y = fHeight+3.0f;
-			Float_in_Water = false;
+			Float_in_Water=false;
 		}
 		SetPosition(xmf3PlayerPosition);
 	}

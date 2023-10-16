@@ -1,12 +1,33 @@
-﻿  Object.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1500,13): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1504,14): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+﻿  3DGP2_Assignment01.cpp
+  Camera.cpp
+  GameFramework.cpp
+  Mesh.cpp
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Mesh.cpp(704,92): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Mesh.cpp(704,71): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Object.cpp
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1512,13): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1516,14): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
   Player.cpp
 C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(876,28): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
 C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(880,26): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+  Scene.cpp
+  Shader.cpp
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(470,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1029,62): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1029,42): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1034,28): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1047,62): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1047,42): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1052,28): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1063,62): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1063,42): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1068,28): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1136,62): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1136,42): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1141,28): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다.
-  7 of 872 functions ( 0.8%) were compiled, the rest were copied from previous compilation.
+  10 of 863 functions ( 1.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    9 functions had inline decision re-evaluated but remain unchanged
+    38 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   3DGP2_Assignment01.vcxproj -> C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\x64\Release\3DGP2_Assignment01.exe

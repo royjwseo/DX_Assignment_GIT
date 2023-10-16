@@ -529,26 +529,26 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		{
 		case VK_RIGHT:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
 			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
 			if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
 				static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, 1.5f, 0.f);
 			break;
 		case VK_LEFT:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
 			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
 			if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
 				static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, -1.5f, 0.f);
 			break;
 		case VK_UP:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
 			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
 			break;
 		case VK_DOWN:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
 			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
 			break;
 		case 'A':
@@ -579,7 +579,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = false;
 			break;
 		case 'F':
-			for (int i = 0; i < m_nSpriteAnimation; i++)m_ppSprite[i]->SetActive(!m_ppSprite[i]->m_bActive);
+			//for (int i = 0; i < m_nSpriteAnimation; i++)m_ppSprite[i]->SetActive(!m_ppSprite[i]->m_bActive);
 			break;
 		default:
 			break;
@@ -590,11 +590,11 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		{
 		case VK_RIGHT:
 		case VK_LEFT:
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = false;
 			break;
 		case VK_UP:
 		case VK_DOWN:
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = false;
+			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
 			break;
 		case 'A':
 		case 'D':
@@ -627,6 +627,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//CObjectsShader* pShader = (CObjectsShader*)m_ppShaders[0];
 	CBuildingShader* pBuildingShader = static_cast<CBuildingShader*>(m_ppShaders[BUILDING_INDEX]);
 	CWindMillShader* pWindMillShader = static_cast<CWindMillShader*>(m_ppShaders[WINDMILL_INDEX]);
+	CTankObjectsShader* pEnemyTankShader = static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX]);
 	CCactusAndRocksShader* pCactusAndRocksShader = static_cast<CCactusAndRocksShader*>(m_ppShaders[CACTUS_AND_ROCKS_INDEX]);
 	CTreeShader* pTreeShader = static_cast<CTreeShader*>(m_ppShaders[TREE_INDEX]);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
@@ -635,6 +636,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//	pShader->m_ppObjects[i]->UpdateBoundingBox();
 	//	
 	//}
+	for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
+		pEnemyTankShader->m_ppTankObjects[i]->UpdateBoundingBox();
+	}
 	for (int i = 0; i < pBuildingShader->m_ntotal_Buildings; i++) {
 		pBuildingShader->m_ppBuildings[i]->UpdateBoundingBox();
 	}
@@ -656,7 +660,19 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (m_pBillboard)m_pBillboard->Animate(fTimeElapsed, m_pPlayer->GetCamera(), m_pPlayer->GetPosition());
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
-			m_ppSprite[i]->Animate(fTimeElapsed);
+			if (m_ppSprite[i]->m_bActive) {
+				SpriteAnimationElapsedTime += fTimeElapsed;
+				if (SpriteAnimationElapsedTime < 2.5f) {
+					m_ppSprite[i]->Animate(fTimeElapsed);
+				}
+				else {
+					SpriteAnimationElapsedTime = 0.f;
+					CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
+					for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
+					m_ppSprite[i]->m_bActive = false;
+				
+				}
+			}
 		}
 	}
 	if (m_pLights)
@@ -677,6 +693,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	CheckBuilding_fourByTankCollisions();
 	CheckCactusByTankCollisions();
 	CheckRockByTankCollisions(fTimeElapsed);
+	CheckEnemyTankByBulletCollisions();
 	//CheckObjectByBulletCollisions();
 //	MoveObjectsInCircle(fTimeElapsed);
 }
@@ -974,23 +991,61 @@ void CScene::CheckRockByTankCollisions(float fTimeElapsed)
 	}
 }
 
-
-
-
-void CScene::MoveObjectsInCircle(float fTimeElapsed)
+void CScene::CheckEnemyTankByBulletCollisions()
 {
-	CObjectsShader* pShader = (CObjectsShader*)m_ppShaders[0];
-	for (int i = 0; i < pShader->m_nObjects; i++) {
-		if (pShader->m_ppObjects[i]->m_bActive && !pShader->m_ppObjects[i]->die && !pShader->m_ppObjects[i]->hitByBullet) {
-			int changer = (i % 2) ? -1 : 1;
-			pShader->m_pAngle[i] += pShader->m_pRotateSpeed[i] * fTimeElapsed * changer;
-			XMFLOAT3 cur_pos = pShader->m_ppObjects[i]->GetPosition();
-			cur_pos.x = pShader->m_pX[i] + pShader->m_pRadius[i] * cos(pShader->m_pAngle[i]);
-			cur_pos.y = pShader->m_pY[i] + pShader->m_pRadius[i] * sin(pShader->m_pAngle[i]);
-			pShader->m_ppObjects[i]->SetPosition(cur_pos);
+	CBulletObject** ppBullets = ((CBulletsShader*)((CTankPlayer*)m_pPlayer)->m_pPlayerShader)->m_ppBullets;
+	CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
+	for (int i = 0; i < pEnemyShader->m_nTanks; i++) {
+		for (int j = 0; j < BULLETS; j++) {
+			if (ppBullets[j]->m_bActive && pEnemyShader->m_ppTankObjects[i]->m_xmCollision.Intersects(ppBullets[j]->m_xmCollision))
+			{
+				//ppBullets[j]->Collided = true;
+				if (!static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet) {
+					static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet = true; //ÅÊÅ© ¸ÂÀ¸¸é - ÅÊÅ© °ü·Ã Ã³¸®
+					ppBullets[j]->Collided = true; //ÃÑ¾Ë ¸ÂÀ¸¸é - ÃÑ¾Ë °ü·Ã Ã³¸®
+					for (int k = 0; k < m_nSpriteAnimation; k++) {
+						m_ppSprite[k]->m_bActive = true; // ÅÊÅ© ¸ÂÀ¸¸é ½ºÇÁ¶óÀÌÆ® ON
+					}
+				}
+				if (static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet) {
+					XMFLOAT3 xmf3CameraPosition = m_pPlayer->GetCamera()->GetPosition();
+					CPlayer* pPlayer = m_pPlayer;
+					XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+					XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+					XMFLOAT3 xmf3EnemyPosition = pEnemyShader->m_ppTankObjects[i]->GetPosition();
+					XMFLOAT3 GetPosDifference = Vector3::Subtract(xmf3EnemyPosition, xmf3PlayerPosition, false);
+					float GetLength = Vector3::Length(GetPosDifference);
+					xmf3EnemyPosition.y += 5.0f;
+					XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, GetLength, false));
+					for (int k = 0; k < m_nSpriteAnimation; k++) {
+						m_ppSprite[k]->SetPosition(xmf3EnemyPosition);
+						m_ppSprite[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+					}
+				}
+			
+			}
 		}
 	}
+
 }
+
+
+
+
+//void CScene::MoveObjectsInCircle(float fTimeElapsed)
+//{
+//	CObjectsShader* pShader = (CObjectsShader*)m_ppShaders[0];
+//	for (int i = 0; i < pShader->m_nObjects; i++) {
+//		if (pShader->m_ppObjects[i]->m_bActive && !pShader->m_ppObjects[i]->die && !pShader->m_ppObjects[i]->hitByBullet) {
+//			int changer = (i % 2) ? -1 : 1;
+//			pShader->m_pAngle[i] += pShader->m_pRotateSpeed[i] * fTimeElapsed * changer;
+//			XMFLOAT3 cur_pos = pShader->m_ppObjects[i]->GetPosition();
+//			cur_pos.x = pShader->m_pX[i] + pShader->m_pRadius[i] * cos(pShader->m_pAngle[i]);
+//			cur_pos.y = pShader->m_pY[i] + pShader->m_pRadius[i] * sin(pShader->m_pAngle[i]);
+//			pShader->m_ppObjects[i]->SetPosition(cur_pos);
+//		}
+//	}
+//}
 
 void CScene::PrepareRender(ID3D12GraphicsCommandList* pd3dCommandList) {
 
@@ -1026,30 +1081,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 				/*auto currentTime = std::chrono::steady_clock::now();
 				auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);*/
 
-				XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
-				CPlayer* pPlayer = pCamera->GetPlayer();
-				XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
-				XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-				/*int x_offset = 0;
-				int y_offset = 0;
-				int z_offset = 0;*/
-				/*	if (timeElapsed.count() >= IntervalMilliseconds) {
-
-						int mark = rand() % 2;
-						 x_offset = (mark == 0) ? rand() % 15 * -1.0f : rand() % 15;
-						 y_offset = (mark == 0) ? rand() % 15 * -1.0f : rand() % 15;
-						 z_offset = (mark == 0) ? rand() % 15 * -1.0f : rand() % 15;
-						 lastRenderTime = currentTime;
-					}*/
-
-				xmf3PlayerPosition.y += 5.0f;
-
-				XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 200.0f, false));
-				//xmf3Position.x += 5.0f + x_offset;
-				//xmf3Position.y += 5.0f + y_offset;
-				//xmf3Position.z += 5.0f + z_offset;
-				m_ppSprite[i]->SetPosition(xmf3Position);
-				m_ppSprite[i]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+			
 				m_ppSprite[i]->Render(pd3dCommandList, pCamera);
 			}
 		}

@@ -449,9 +449,9 @@ void CGameFramework::ProcessInput()
 		// 스페이스바 처리
 		static bool bSpaceKeyPressed = false; // 스페이스바 입력 상태를 추적
 		static std::chrono::steady_clock::time_point lastSpacePressTime = std::chrono::steady_clock::now();
-		static const int spacePressIntervalMilliseconds = 300; // 스페이스바 입력 간격 (1000 은예: 1초)
+		static const int spacePressIntervalMilliseconds = 600; // 스페이스바 입력 간격 (1000 은예: 1초)
 
-		if (pKeysBuffer[VK_SPACE] & 0xF0)
+		if (pKeysBuffer[VK_SPACE] & 0xF0&& !static_cast<CTankPlayer*>(m_pPlayer)->is_Going)
 		{
 			// 스페이스바가 눌린 경우
 			auto currentTime = std::chrono::steady_clock::now();
@@ -460,11 +460,12 @@ void CGameFramework::ProcessInput()
 			if (!bSpaceKeyPressed || timeElapsed.count() >= spacePressIntervalMilliseconds)
 			{
 				// 스페이스바가 처음 눌린 경우 또는 일정 시간 간격 이상이 지난 경우에만 동작 처리
+				// 탱크 움직일 때 발사 못함.
 				if (!m_pPlayer->machine_mode)
 				{
 					if (!m_pPlayer->bullet_camera_mode)
 						static_cast<CTankPlayer*>(m_pPlayer)->FireBullet(NULL);
-					static_cast<CTankPlayer*>(m_pPlayer)->Fired_Bullet = true;
+					
 
 					m_pPlayer->bullet_camera_mode = true;
 				}

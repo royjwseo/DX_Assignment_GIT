@@ -481,10 +481,7 @@ CGameObject* CGameObject::FindFrame(char* pstrFrameName)
 
 	return(NULL);
 }
-void CGameObject::DieEffect() {
 
-
-}
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
@@ -1194,13 +1191,15 @@ void CBulletObject::Reset()
 	m_fElapsedTimeAfterFire = 0;
 	m_fMovingDistance = 0;
 	m_fRotationAngle = 0.0f;
-	//Collided = false;
+	CollideLockingTime = 0.0f;
+	Collided = false;
 
 	m_bActive = false;
 }
 
-void CBulletObject::Animate(float fElapsedTime)
+void CBulletObject::Animate(float fElapsedTime,void *pContext)
 {
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_fElapsedTimeAfterFire += fElapsedTime;
 
 	float fDistance = m_fMovingSpeed * fElapsedTime;
@@ -1211,11 +1210,24 @@ void CBulletObject::Animate(float fElapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-
-	UpdateBoundingBox();
-	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime) || Collided) {
+	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z)) {
 		if (!m_pPlayer->machine_mode)
-			m_pPlayer->bullet_camera_mode = false;
+			m_pPlayer->bullet_camera_mode = false; //이건 껏다 켰다 하는 bool 값 
+		Reset();
+	}
+	UpdateBoundingBox();
+	if (Collided) {
+		CollideLockingTime += fElapsedTime;
+		fDistance = 0.f;//움직이지 못하게 하고, Collided발동시 렌더하지 않도록 함.
+		if (CollideLockingTime > 2.0f) {
+			if(!m_pPlayer->machine_mode) //제거 해야할수도
+			m_pPlayer->bullet_camera_mode = false; 
+			Reset();
+		}
+	}
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) {
+		if (!m_pPlayer->machine_mode)
+			m_pPlayer->bullet_camera_mode = false; //머신 모드가 아니고 bulletcameramode가 아닐때 쏘면 bulletcameramode로 바뀜.
 		Reset();
 	}
 }

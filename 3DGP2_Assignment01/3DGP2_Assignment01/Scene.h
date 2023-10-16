@@ -62,8 +62,10 @@ public:
 	void CheckWindMillByTankCollisions();
 	void CheckCactusByTankCollisions();
 	void CheckRockByTankCollisions(float fTimeElapsed);
+	void CheckEnemyTankByBulletCollisions();
+	
 
-	void MoveObjectsInCircle(float fTimeElapsed);
+	//void MoveObjectsInCircle(float fTimeElapsed);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
@@ -103,6 +105,9 @@ public:
 	CHeightMapTerrain* m_pTerrain = NULL;
 	LIGHT* m_pLights = NULL;
 	int									m_nLights = 0;
+
+
+	float SpriteAnimationElapsedTime = 0.f;
 
 	//--------water  animation
 	CTerrainWater* m_pTerrainWater = NULL;
