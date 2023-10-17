@@ -98,6 +98,7 @@ public:
 
 	CSkyBox* m_pSkyBox = NULL;
 	CBillboardObject* m_pBillboard = NULL;
+	CBillboardObject* m_pBillboard2 = NULL;
 
 	int m_nSpriteAnimation = 0;
 	CMultiSpriteObject** m_ppSprite = NULL;

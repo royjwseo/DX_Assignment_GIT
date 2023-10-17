@@ -1197,7 +1197,7 @@ void CBulletObject::Reset()
 	m_bActive = false;
 }
 
-void CBulletObject::Animate(float fElapsedTime,void *pContext)
+void CBulletObject::Animate(float fElapsedTime, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_fElapsedTimeAfterFire += fElapsedTime;
@@ -1247,28 +1247,28 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4Transform._31 = mtxLookAt._13; m_xmf4x4Transform._32 = mtxLookAt._23; m_xmf4x4Transform._33 = mtxLookAt._33;
 }
 
-CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 1)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,wchar_t* pfilePath) : CGameObject(0, 1)
 {
-	//CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30.0f, 30.0f, 0.0f,0.f,0.f,-100.f);
-	//SetMesh(pBillboardMesh);
-	//
-	//
+	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f,0.f,0.f,0.f);
+	SetMesh(pBillboardMesh);
+	
+	
 
-	//CTexture* pBillboardTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Sunny.dds", RESOURCE_TEXTURE2D, 0);
+	CTexture* pBillboardTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList,pfilePath, RESOURCE_TEXTURE2D, 0);
 
-	//CBillboardShader* pBillboardShader = new CBillboardShader();
-	//pBillboardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	////pBillboardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CBillboardShader* pBillboardShader = new CBillboardShader();
+	pBillboardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//pBillboardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	//pBillboardShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//pBillboardShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 15);
+	pBillboardShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pBillboardShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 16);
 
-	//CMaterial* pBillboardMaterial = new CMaterial();
-	//pBillboardMaterial->SetTexture(pBillboardTexture);
-	//pBillboardMaterial->SetShader(pBillboardShader);
+	CMaterial* pBillboardMaterial = new CMaterial();
+	pBillboardMaterial->SetTexture(pBillboardTexture);
+	pBillboardMaterial->SetShader(pBillboardShader);
 
-	//SetMaterial(0, pBillboardMaterial);//변경 SetMaterial(0,pSkyBoxMaterial);
+	SetMaterial(0, pBillboardMaterial);//변경 SetMaterial(0,pSkyBoxMaterial);
 
 }
 
@@ -1276,10 +1276,17 @@ CBillboardObject::~CBillboardObject()
 {
 }
 
-void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera, XMFLOAT3 pos)
+void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera)
 {
 
 	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+	CPlayer* pPlayer = pCamera->GetPlayer();
+	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+	XMFLOAT3 xmf3PlayerLook = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetLook();
+	//xmf3PlayerPosition.y += 5.0f;
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 150.0f, false));
+
+	SetPosition(xmf3Position);
 	SetLookAt(xmf3CameraPosition);
 }
 

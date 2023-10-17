@@ -32,7 +32,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 	
-	m_pLights[1].m_bEnable = false;
+	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 1000.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
@@ -75,7 +75,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	BuildDefaultLightsAndMaterials();
 
-	//m_pBillboard = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pBillboard = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds");
+	m_pBillboard2= new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds");//Dot2->Red
+
 	//빌보드 위치 초기화
 	m_nSpriteAnimation = 3;
 	m_ppSprite = new CMultiSpriteObject * [m_nSpriteAnimation];
@@ -168,6 +170,7 @@ void CScene::ReleaseObjects()
 	if (m_pSkyBox) delete m_pSkyBox;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pBillboard) delete m_pBillboard;
+	if (m_pBillboard2)delete m_pBillboard2;
 	if (m_ppSprite) { 
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->Release();
@@ -503,6 +506,7 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	if (m_pBillboard)m_pBillboard->ReleaseUploadBuffers();
+	if (m_pBillboard2)m_pBillboard2->ReleaseUploadBuffers();
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->ReleaseUploadBuffers();
@@ -657,7 +661,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < pTreeShader->m_nSingleTrees; i++) {
 		pTreeShader->m_ppSingleTrees[i]->UpdateBoundingBox();
 	}
-	if (m_pBillboard)m_pBillboard->Animate(fTimeElapsed, m_pPlayer->GetCamera(), m_pPlayer->GetPosition());
+	if (m_pBillboard)m_pBillboard->Animate(fTimeElapsed, m_pPlayer->GetCamera());
+	if (m_pBillboard2)m_pBillboard2->Animate(fTimeElapsed, m_pPlayer->GetCamera());
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			if (m_ppSprite[i]->m_bActive) {
@@ -1070,7 +1075,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	         //  if (m_pBillboard)m_pBillboard->Render(pd3dCommandList, pCamera);
+	
 	if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
 	if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
 //	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
@@ -1086,5 +1091,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 			}
 		}
 	}
+	if (m_pBillboard)m_pBillboard->Render(pd3dCommandList, pCamera);
+	if (m_pBillboard2)m_pBillboard2->Render(pd3dCommandList, pCamera);
 }
 

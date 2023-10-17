@@ -415,14 +415,14 @@ public:
 	virtual ~CBulletObject();
 
 public:
-	virtual void Animate(float fElapsedTime, void* pContext);
+	virtual void Animate(float fElapsedTime,void *pContext);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 400.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
 	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-
+	LPVOID m_pContextforAnimation = NULL;
 
 	bool Collided = false;
 	float CollideLockingTime = 0.0f;
@@ -440,12 +440,12 @@ public:
 
 class CBillboardObject :public CGameObject {
 public:
-	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath);
 	virtual ~CBillboardObject();
 
 public:
 
-	virtual void Animate(float fTimeElapsed, CCamera* pCamera, XMFLOAT3);
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
 
 };
