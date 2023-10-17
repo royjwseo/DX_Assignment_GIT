@@ -440,12 +440,12 @@ public:
 
 class CBillboardObject :public CGameObject {
 public:
-	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath);
+	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath,float width,float height);
 	virtual ~CBillboardObject();
 
 public:
 
-	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera , float distance);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
 
 };

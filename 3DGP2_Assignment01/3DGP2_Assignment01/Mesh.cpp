@@ -631,6 +631,7 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
 	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
 
+
 	return(xmf3Normal);
 }
 
@@ -701,7 +702,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		{
 			fHeight = OnGetHeight(x, z, pContext);
 			pVertices[i].m_xmf3Position = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
-			pVertices[i].m_xmf3Normal = pHeightMapImage->GetHeightMapNormal((x * m_xmf3Scale.x), (z * m_xmf3Scale.z));
+			pVertices[i].m_xmf3Normal = pHeightMapImage->GetHeightMapNormal(x, z ); //내부 하이트맵 이미지로 스케일값 반영.
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			pVertices[i].m_xmf2TexCoord0= XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
 			// Detail 텍스쳐로 경사로 늘어짐에따른 텍스쳐 디테일 보완시키는. 
@@ -830,7 +831,7 @@ CGridMesh::CGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		{
 			fHeight = OnGetHeight(x, z, pContext);
 			pVertices[i].m_xmf3Position = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
-			pVertices[i].m_xmf3Normal = static_cast<CHeightMapTerrain*>(pContext)->GetNormal((x * m_xmf3Scale.x), (z * m_xmf3Scale.z));
+			pVertices[i].m_xmf3Normal = static_cast<CHeightMapTerrain*>(pContext)->GetNormal(x , z);
 			
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;

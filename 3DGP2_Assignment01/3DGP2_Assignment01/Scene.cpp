@@ -20,50 +20,50 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	m_pLights[0].m_bEnable = false;
 	m_pLights[0].m_nType = POINT_LIGHT;
-	m_pLights[0].m_fRange = 1000.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	m_pLights[0].m_fRange = 3000.0f;
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
+	m_pLights[0].m_xmf3Position = XMFLOAT3(3212.0f, 180.0f, 3212.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 	
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 1000.0f;
+	m_pLights[1].m_fRange = 400.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(3212.0f, 180.0f, 3212.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 15.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(25.0f));
+	m_pLights[1].m_fFalloff = 8.0f;
+	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(30.0f));
+	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(15.0f));
 	
 	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	
-	m_pLights[3].m_bEnable = false;
+	m_pLights[3].m_bEnable = true;
 	m_pLights[3].m_nType = SPOT_LIGHT;
-	m_pLights[3].m_fRange = 600.0f;
-	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.0f, 0.0f, 1.0f);
-	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.0f, 0.0f, 1.0f);
-	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.0f, 0.0f, 0.0f);
+	m_pLights[3].m_fRange = 300.0f;
+	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights[3].m_xmf3Position = XMFLOAT3(50.0f, 50.0f, 30.0f);
-	m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights[3].m_fFalloff = 8.0f;
-	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
-	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(30.0f));
+	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(15.0f));
 
 
 
@@ -75,8 +75,14 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	BuildDefaultLightsAndMaterials();
 
-	m_pBillboard = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds");
-	m_pBillboard2= new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds");//Dot2->Red
+	m_nDotBillboard = 7;
+	m_ppDotBillboard = new CBillboardObject * [m_nDotBillboard];
+	for (int i = 0; i < 5; i++) {
+		m_ppDotBillboard[i] =new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",3,3);;
+	}
+	m_ppDotBillboard[5] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds",10.0f,10.0f);
+	m_ppDotBillboard[6]= new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",10.0f,10.0f);//Dot2->Red
+
 
 	//빌보드 위치 초기화
 	m_nSpriteAnimation = 3;
@@ -169,8 +175,13 @@ void CScene::ReleaseObjects()
 
 	if (m_pSkyBox) delete m_pSkyBox;
 	if (m_pTerrain) delete m_pTerrain;
-	if (m_pBillboard) delete m_pBillboard;
-	if (m_pBillboard2)delete m_pBillboard2;
+
+	if (m_ppDotBillboard) {
+		for (int i = 0; i < m_nDotBillboard; i++) {
+			delete m_ppDotBillboard[i];
+		}
+		delete m_ppDotBillboard;
+	}
 	if (m_ppSprite) { 
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->Release();
@@ -505,8 +516,7 @@ void CScene::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
-	if (m_pBillboard)m_pBillboard->ReleaseUploadBuffers();
-	if (m_pBillboard2)m_pBillboard2->ReleaseUploadBuffers();
+	
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->ReleaseUploadBuffers();
@@ -583,6 +593,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = false;
 			break;
 		case 'F':
+			aiming_point_mode = (++aiming_point_mode % 4);
 			//for (int i = 0; i < m_nSpriteAnimation; i++)m_ppSprite[i]->SetActive(!m_ppSprite[i]->m_bActive);
 			break;
 		default:
@@ -661,8 +672,16 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < pTreeShader->m_nSingleTrees; i++) {
 		pTreeShader->m_ppSingleTrees[i]->UpdateBoundingBox();
 	}
-	if (m_pBillboard)m_pBillboard->Animate(fTimeElapsed, m_pPlayer->GetCamera());
-	if (m_pBillboard2)m_pBillboard2->Animate(fTimeElapsed, m_pPlayer->GetCamera());
+
+	if (m_ppDotBillboard) {
+		
+		for (int i = 0; i < 5; i++) {
+			m_ppDotBillboard[i]->Animate(fTimeElapsed, m_pPlayer->GetCamera(),35*(i+1));
+		}
+		m_ppDotBillboard[5]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
+		m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(),200.f);
+	}
+
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			if (m_ppSprite[i]->m_bActive) {
@@ -682,11 +701,15 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 	if (m_pLights)
 	{
-		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-		m_pLights[3].m_xmf3Position = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetPosition();
-		m_pLights[3].m_xmf3Direction = XMFLOAT3(static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook().x, static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook().y+0.15f, static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook().z);
-
+		//m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
+		//m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
+	/*	if (m_pLights[0].m_fRange > 500.0f) {
+			m_pLights[0].m_fRange -= 50.0f * fTimeElapsed;//나중에 마무리될때 ㄲ
+		}*/
+		XMFLOAT3 Tankpos = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetPosition();
+		m_pLights[1].m_xmf3Position = Tankpos;
+		m_pLights[1].m_xmf3Direction = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
+		
 	}
 
 	m_xmf4x4WaterAnimation._31 += fTimeElapsed * 0.00125f;
@@ -1091,7 +1114,25 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 			}
 		}
 	}
-	if (m_pBillboard)m_pBillboard->Render(pd3dCommandList, pCamera);
-	if (m_pBillboard2)m_pBillboard2->Render(pd3dCommandList, pCamera);
+	
+	if (m_ppDotBillboard) {
+		if (aiming_point_mode == 0) {
+			for (int i = 0; i < m_nDotBillboard; i++) {
+				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+			}
+		}
+		else if (aiming_point_mode == 1) {
+			for (int i = 0; i < 5; i++) {
+				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+			}
+		}
+		else if(aiming_point_mode==2) {
+			for (int i = 5; i < 7; i++) {
+				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+			}
+		}
+		
+		
+	}
 }
 

@@ -413,7 +413,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 			else if (fAlpha > 0.8975f) cColor = cDetailTexColors[0];
 			else cColor = cDetailTexColors[1];
 		*/
-		cColor = lerp(cColor, cIllumination, 0.1f);
+		cColor = lerp(cColor, cIllumination, 0.6f);
 			return(cColor);
 }
 

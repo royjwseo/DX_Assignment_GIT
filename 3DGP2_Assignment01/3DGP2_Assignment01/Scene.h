@@ -89,34 +89,38 @@ public:
 
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
-
-	int									m_nGameObjects = 0;
-	CGameObject** m_ppGameObjects = NULL;
-
+//---------------
+	/*int									m_nGameObjects = 0;
+	CGameObject** m_ppGameObjects = NULL;*/
+	//---------------
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
-
+	//---------------
 	CSkyBox* m_pSkyBox = NULL;
-	CBillboardObject* m_pBillboard = NULL;
-	CBillboardObject* m_pBillboard2 = NULL;
-
+	
+//---------------
+	int m_nDotBillboard = 0;
+	CBillboardObject** m_ppDotBillboard = NULL;
+	int aiming_point_mode = 0;
+//---------------
 	int m_nSpriteAnimation = 0;
 	CMultiSpriteObject** m_ppSprite = NULL;
-
+//---------------
 	CHeightMapTerrain* m_pTerrain = NULL;
+//---------------
 	LIGHT* m_pLights = NULL;
 	int									m_nLights = 0;
-
+//---------------
 
 	float SpriteAnimationElapsedTime = 0.f;
 
-	//--------water  animation
+//--------water  animation
 	CTerrainWater* m_pTerrainWater = NULL;
 	CRippleWater* m_pRipplewater = NULL;
 	XMFLOAT4X4					m_xmf4x4WaterAnimation;
 	ID3D12Resource* m_pd3dcbWaterAnimation = NULL;
 	XMFLOAT4X4* m_pcbMappedWaterAnimation = NULL;
-
+//---------------
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource* m_pd3dcbLights = NULL;

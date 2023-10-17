@@ -1247,9 +1247,9 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4Transform._31 = mtxLookAt._13; m_xmf4x4Transform._32 = mtxLookAt._23; m_xmf4x4Transform._33 = mtxLookAt._33;
 }
 
-CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,wchar_t* pfilePath) : CGameObject(0, 1)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,wchar_t* pfilePath,float width,float height) : CGameObject(0, 1)
 {
-	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f,0.f,0.f,0.f);
+	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, width, height, 0.0f,0.f,0.f,0.f);
 	SetMesh(pBillboardMesh);
 	
 	
@@ -1276,7 +1276,7 @@ CBillboardObject::~CBillboardObject()
 {
 }
 
-void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera)
+void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera,float distance)
 {
 
 	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
@@ -1284,7 +1284,7 @@ void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera)
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetLook();
 	//xmf3PlayerPosition.y += 5.0f;
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 150.0f, false));
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, distance, false));
 
 	SetPosition(xmf3Position);
 	SetLookAt(xmf3CameraPosition);
