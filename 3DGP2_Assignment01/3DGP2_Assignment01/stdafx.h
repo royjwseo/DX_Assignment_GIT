@@ -19,6 +19,7 @@
 #include <vector>
 #include <numeric>
 #include <random>
+#include <cstdlib>
 
 #include <string>
 #include <wrl.h>

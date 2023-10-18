@@ -6,8 +6,8 @@
 #include "Shader.h"
 
 default_random_engine dre;
-uniform_real_distribution<float> uid(2000.0, 4000.0);
-uniform_real_distribution<float> uid2(1000.0, 5000.0);
+uniform_real_distribution<float> uid(1000.0, 4500.0);
+uniform_real_distribution<float> uid2(2000.0, 4000.0);
 
 CShader::CShader()
 {
@@ -1054,6 +1054,21 @@ void CBillboardShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
+bool CShader::ReturnTerrainHeightDifference(float h1, float h2, void* pContext)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	if (pTerrain->GetHeight(h1, h2) < 190.0f) return false;
+	if (abs(pTerrain->GetHeight(h1, h2) - pTerrain->GetHeight(h1 + 10, h2)) > 3.0f || abs(pTerrain->GetHeight(h1, h2) - pTerrain->GetHeight(h1 - 10, h2)) > 3.0f
+		|| abs(pTerrain->GetHeight(h1, h2) - pTerrain->GetHeight(h1, h2 + 10)) > 3.0f || abs(pTerrain->GetHeight(h1, h2) - pTerrain->GetHeight(h1, h2 - 10)) > 3.0f) {
+		return false;
+	}
+	else {
+		return true;
+	}
+
+
+}
+
 CBuildingShader::CBuildingShader()
 {
 }
@@ -1080,18 +1095,21 @@ void CBuildingShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_ppBuildings = new CGameObject * [m_ntotal_Buildings];
 	m_ppBuildingsHeight = new int[m_ntotal_Buildings];
 	for (int i = 0; i < 5; i++) {
-		//XMFLOAT3 BuildingPos = RandomPositionInCircle(XMFLOAT3(3000, 330, 3000), 3000);
-		//terrain 가로 세로 6425 가운데는 3212 3212
-		XMFLOAT3 BuildingPos = XMFLOAT3(rand() % 6000, 0.f, rand() % 6000);
+		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
+		
 		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-		int z = (int)(BuildingPos.z / xmf3Scale.z);
+		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
 		bool bReverseQuad = ((z % 2) != 0);
-		float fHeight = pTerrain->GetHeight(BuildingPos.x, BuildingPos.z, bReverseQuad) + 1.0f;
-		m_ppBuildingsHeight[i] = fHeight;
+		float fHeight = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x,xmf3RandomPosition.z,pContext)) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
+		m_ppBuildingsHeight[i] = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
 		m_ppBuildings[i] = new CGameObject(0,0);
 		m_ppBuildings[i]->SetChild(pBuilding_threeMesh);
 		pBuilding_threeMesh->AddRef();
-		m_ppBuildings[i]->SetPosition(BuildingPos.x, fHeight, BuildingPos.z);
+		m_ppBuildings[i]->SetPosition(xmf3RandomPosition.x, m_ppBuildingsHeight[i], xmf3RandomPosition.z);
 		//m_ppBuildings[i]->Rotate(0.f, 90.0f * i, 0.f);
 	//	m_ppBuildings[i]->SetOOBB(130.0f, 80.5f, 120.0f);
 		m_ppBuildings[i]->SetOOBB(196.0f, 120.f, 180.0f);
@@ -1100,32 +1118,40 @@ void CBuildingShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	for (int i = 5; i < 10; i++) {
 		//XMFLOAT3 BuildingPos = RandomPositionInCircle(XMFLOAT3(3000, 330, 3000), 3000);
 		//terrain 가로 세로 6425 가운데는 3212 3212
-		XMFLOAT3 BuildingPos = XMFLOAT3(rand() % 6000, 0.f, rand() % 6000);
+		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
 		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-		int z = (int)(BuildingPos.z / xmf3Scale.z);
+		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
 		bool bReverseQuad = ((z % 2) != 0);
-		float fHeight = pTerrain->GetHeight(BuildingPos.x, BuildingPos.z, bReverseQuad) + 1.0f;
-		m_ppBuildingsHeight[i] = fHeight;
-		m_ppBuildings[i] = new CGameObject(0,0);
+		float fHeight = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x, xmf3RandomPosition.z, pContext)) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
+		m_ppBuildingsHeight[i] = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		m_ppBuildings[i] = new CGameObject(0, 0);
 		m_ppBuildings[i]->SetChild(pBuilding_fiveMesh);
 		pBuilding_fiveMesh->AddRef();
-		m_ppBuildings[i]->SetPosition(BuildingPos.x, fHeight, BuildingPos.z);
+		m_ppBuildings[i]->SetPosition(xmf3RandomPosition.x, m_ppBuildingsHeight[i], xmf3RandomPosition.z);
 		//m_ppBuildings[i]->Rotate(0.f, 90.0f * i, 0.f);
 		m_ppBuildings[i]->SetOOBB(168.0f, 60.5f, 146.0f);
 	}
 	for (int i = 10; i < 15; i++) {
 		//XMFLOAT3 BuildingPos = RandomPositionInCircle(XMFLOAT3(3000, 330, 3000), 3000);
 		//terrain 가로 세로 6425 가운데는 3212 3212
-		XMFLOAT3 BuildingPos = XMFLOAT3(rand() % 6000, 0.f, rand() % 6000);
+		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
 		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-		int z = (int)(BuildingPos.z / xmf3Scale.z);
+		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
 		bool bReverseQuad = ((z % 2) != 0);
-		float fHeight = pTerrain->GetHeight(BuildingPos.x, BuildingPos.z, bReverseQuad) + 1.0f;
-		m_ppBuildingsHeight[i] = fHeight;
-		m_ppBuildings[i] = new CGameObject(0,0);
+		float fHeight = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x, xmf3RandomPosition.z, pContext)) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
+		m_ppBuildingsHeight[i] = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		m_ppBuildings[i] = new CGameObject(0, 0);
 		m_ppBuildings[i]->SetChild(pBuilding_fourMesh);
 		pBuilding_fourMesh->AddRef();
-		m_ppBuildings[i]->SetPosition(BuildingPos.x, fHeight, BuildingPos.z);
+		m_ppBuildings[i]->SetPosition(xmf3RandomPosition.x, m_ppBuildingsHeight[i], xmf3RandomPosition.z);
 		m_ppBuildings[i]->SetOOBB(168.0f, 60.5f, 196.0f); //실제 바운딩박스는 두배적게 안만들어짐 
 	}
 }
@@ -1189,17 +1215,21 @@ void CWindMillShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	for (int i = 0; i < m_nWindMills; i++) {
 		//XMFLOAT3 BuildingPos = RandomPositionInCircle(XMFLOAT3(3000, 330, 3000), 3000);
 		//terrain 가로 세로 6425 가운데는 3212 3212
-		XMFLOAT3 BuildingPos = XMFLOAT3(rand() % 6000, 0.f, rand() % 6000);
+		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
 		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-		int z = (int)(BuildingPos.z / xmf3Scale.z);
+		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
 		bool bReverseQuad = ((z % 2) != 0);
-		float fHeight = pTerrain->GetHeight(BuildingPos.x, BuildingPos.z, bReverseQuad) + 1.0f;
-		m_ppWindMillsHeight[i] = fHeight;
+		float fHeight = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
+		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x, xmf3RandomPosition.z, pContext)) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
+		m_ppWindMillsHeight[i] = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
 		m_ppWindMills[i] = new CWindMillObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppWindMills[i]->SetChild(pWindMillMesh);
 		pWindMillMesh->AddRef();
-		m_ppWindMills[i]->SetPosition(BuildingPos.x, fHeight, BuildingPos.z);
-		m_ppWindMills[i]->Rotate(0.f, 90.0f * i, 0.f);
+		m_ppWindMills[i]->SetPosition(xmf3RandomPosition.x, m_ppWindMillsHeight[i], xmf3RandomPosition.z);
+		m_ppWindMills[i]->Rotate(0.f, rand()%270, 0.f);
 		(m_ppWindMills[i])->SetOOBB(168.0f, 120.f, 168.0f);
 		m_ppWindMills[i]->PrepareAnimate();
 
@@ -1449,9 +1479,9 @@ CCactusAndRocksShader::~CCactusAndRocksShader()
 
 void CCactusAndRocksShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nCactus = 15;
+	m_nCactus = 40;
 	m_ppCactus = new CGameObject * [m_nCactus];
-	m_nRock = 15;
+	m_nRock = 20;
 	m_ppRocks = new CGameObject * [m_nRock];
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2); //각각 1개 Albedo만.
 	CGameObject* pRockObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rock.bin", this);
@@ -1464,7 +1494,11 @@ void CCactusAndRocksShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 		pRockObject->AddRef();
 		m_ppRocks[i]->SetOOBB(26.0, 20.0f, 22.0);
 		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
+		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
+		while (pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z) < 190.0f) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
 		m_ppRocks[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
 
 
@@ -1477,6 +1511,10 @@ void CCactusAndRocksShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 		m_ppCactus[i]->SetOOBB(5.0, 10.0f, 5.0);
 		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
+		while (pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z) < 190.0f) {
+			xmf3RandomPosition.x = uid(dre);
+			xmf3RandomPosition.z = uid(dre);
+		}
 		m_ppCactus[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
 		//m_ppCactus[i]->SetScale(1.f, 0.1f, 1.f);
 
@@ -1568,7 +1606,11 @@ void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ppMultipleTrees[i]=new TreesObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppMultipleTrees[i]->SetChild(pMultipleTreeModel);
 		pMultipleTreeModel->AddRef();
-		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
+		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
+		while (pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z) < 190.0f) {
+			xmf3RandomPosition.x = uid2(dre);
+			xmf3RandomPosition.z = uid2(dre);
+		}
 		m_ppMultipleTrees[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
 		
 	}
@@ -1577,6 +1619,10 @@ void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ppSingleTrees[i]->SetChild(pSingleTreeModel);
 		pSingleTreeModel->AddRef();
 		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
+		while (pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z) < 190.0f) {
+			xmf3RandomPosition.x = uid2(dre);
+			xmf3RandomPosition.z = uid2(dre);
+		}
 		m_ppSingleTrees[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
 
 	}
