@@ -511,6 +511,9 @@ private:
 	float MovingSpeed = 5.f;
 	float RotationSpeed = 1.5f;
 
+	float UpdateTimeElapsed = 0.f;
+	float UpdateDuration = 0.5f;
+
 	// 물 위에 뜨기 위한 변수들
 	bool Float_in_Water = false;
 	float FloatEffectTimeElapsed = 0.f;
@@ -535,7 +538,7 @@ public:
 	void DieEffect();
 
 	void Update(float fTimeElapsed);
-	void UpdateTankPosition(float fTimeElapsed);
+	void UpdateTankPosition();
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

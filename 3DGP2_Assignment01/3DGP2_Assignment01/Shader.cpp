@@ -1665,14 +1665,14 @@ D3D12_RASTERIZER_DESC CTreeShader::CreateRasterizerState()
 
 void CTreeShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nMultipleTrees; j++) {
+	/*for (int j = 0; j < m_nMultipleTrees; j++) {
 		if (m_ppMultipleTrees[j]) m_ppMultipleTrees[j]->Animate(fTimeElapsed);
 		
 	}
 	for (int j = 0; j < m_nSingleTrees; j++) {
 		if (m_ppSingleTrees[j]) m_ppSingleTrees[j]->Animate(fTimeElapsed);
 		
-	}
+	}*/
 }
 
 void CTreeShader::ReleaseUploadBuffers()

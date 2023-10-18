@@ -75,13 +75,14 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	BuildDefaultLightsAndMaterials();
 
-	m_nDotBillboard = 7;
+	m_nDotBillboard = 8;
 	m_ppDotBillboard = new CBillboardObject * [m_nDotBillboard];
 	for (int i = 0; i < 5; i++) {
 		m_ppDotBillboard[i] =new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",3,3);;
 	}
 	m_ppDotBillboard[5] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds",10.0f,10.0f);
 	m_ppDotBillboard[6]= new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",10.0f,10.0f);//Dot2->Red
+	m_ppDotBillboard[7] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot_Sight.dds", 10.0f, 10.0f);//Dot2->Red
 
 
 	//빌보드 위치 초기화
@@ -567,11 +568,11 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			break;
 		case 'A':
 
-			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = -0.25f;
+			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = -0.15f;
 
 			break;
 		case 'D':
-			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.25f;
+			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.15f;
 			break;
 		case 'W':
 
@@ -680,6 +681,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		}
 		m_ppDotBillboard[5]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 		m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(),200.f);
+		m_ppDotBillboard[7]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 	}
 
 	if (m_ppSprite) {
@@ -1117,7 +1119,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	
 	if (m_ppDotBillboard) {
 		if (aiming_point_mode == 0) {
-			for (int i = 0; i < m_nDotBillboard; i++) {
+			for (int i = 0; i < m_nDotBillboard-1; i++) {
 				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
 			}
 		}
@@ -1127,9 +1129,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 			}
 		}
 		else if(aiming_point_mode==2) {
-			for (int i = 5; i < 7; i++) {
-				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
-			}
+			m_ppDotBillboard[7]->Render(pd3dCommandList, pCamera);
 		}
 		
 		

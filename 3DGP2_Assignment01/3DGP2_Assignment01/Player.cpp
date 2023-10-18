@@ -86,6 +86,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	}
 }
 
+
 void CPlayer::Rotate(float x, float y, float z)
 {
 
@@ -514,7 +515,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	//SetOOBB(18.0, 12.0f, 38.0);
 	SetOOBB(9.0, 15.0f, 19.0);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f, 400.0f, pTerrain->GetLength() * 0.5f));
+	SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f, 255.0f, pTerrain->GetLength() * 0.5f));
 	SetPlayerUpdatedContext(pTerrain);
 	SetCameraUpdatedContext(pTerrain);
 
@@ -640,8 +641,9 @@ void CTankPlayer::Update(float fTimeElapsed)
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
+	
+	
 	Move(m_xmf3Velocity, false);
-
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 	if (m_pPlayerUpdatedContext) {
 		UpdateTankPosition(fTimeElapsed);
@@ -832,7 +834,7 @@ void CTankPlayer::UpdateTankPosition(float fTimeElapsed)
 		}
 		else {
 			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
-			xmf3PlayerPosition.y = fHeight+3.0f;
+			xmf3PlayerPosition.y = fHeight;
 			Float_in_Water=false;
 		}
 		SetPosition(xmf3PlayerPosition);

@@ -1210,7 +1210,7 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z)) {
+	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z)&&!Collided) {
 		if (!m_pPlayer->machine_mode)
 			m_pPlayer->bullet_camera_mode = false; //이건 껏다 켰다 하는 bool 값 
 		Reset();
@@ -1219,13 +1219,13 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 	if (Collided) {
 		CollideLockingTime += fElapsedTime;
 		fDistance = 0.f;//움직이지 못하게 하고, Collided발동시 렌더하지 않도록 함.
-		if (CollideLockingTime > 2.0f) {
-			if(!m_pPlayer->machine_mode) //제거 해야할수도
-			m_pPlayer->bullet_camera_mode = false; 
+		if (CollideLockingTime > 5.0f) {
+			if (!m_pPlayer->machine_mode) //제거 해야할수도
+				m_pPlayer->bullet_camera_mode = false;
 			Reset();
 		}
 	}
-	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) {
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)&&!Collided) {
 		if (!m_pPlayer->machine_mode)
 			m_pPlayer->bullet_camera_mode = false; //머신 모드가 아니고 bulletcameramode가 아닐때 쏘면 bulletcameramode로 바뀜.
 		Reset();
@@ -1434,14 +1434,20 @@ void CTankObject::Update(float fTimeElapsed)
 	
 	RotateWheels(fTimeElapsed);
 	if (m_pTankObjectUpdatedContext) {
-		UpdateTankPosition(fTimeElapsed);
+		UpdateTimeElapsed += fTimeElapsed;
+		if (UpdateTimeElapsed < UpdateDuration) {
+			UpdateTankPosition();
+		}
+		else {
+			UpdateTimeElapsed = 0.0f;
+		}
 	}
 	if (Float_in_Water)
 		FloatEffect(fTimeElapsed);
 	
 }
 
-void CTankObject::UpdateTankPosition(float fTimeElapsed)
+void CTankObject::UpdateTankPosition()
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
@@ -1449,20 +1455,21 @@ void CTankObject::UpdateTankPosition(float fTimeElapsed)
 	int z = (int)(xmf3TankPosition.z / xmf3Scale.z);
 	bool bReverseQuad = ((z % 2) != 0);
 	float fHeight = pTerrain->GetHeight(xmf3TankPosition.x, xmf3TankPosition.z, bReverseQuad) + 6.0f;
-	if(fHeight>179.0f)MoveUp(-0.5f);
+	if (fHeight > 179.0f)MoveUp(-0.5f);
 	if (xmf3TankPosition.y < fHeight)
 	{
-		
+
 		if (fHeight < 180.0f) {
-			
+
 			Float_in_Water = true;
 		}
 		else {
 			Float_in_Water = false;
-			xmf3TankPosition.y = fHeight-3.0f;
+			xmf3TankPosition.y = fHeight - 3.0f;
 		}
 		SetPosition(xmf3TankPosition);
 	}
+
 }
 
 //std::random_device rd;
@@ -1513,6 +1520,7 @@ void CTankObject::RotateWheels(float fTimeElapsed)
 
 void CTankObject::FloatEffect(float fTimeElapsed)
 {
+	
 
 	FloatEffectTimeElapsed += fTimeElapsed;
 	if (FloatEffectTimeElapsed < FloatUpDuration) {
@@ -1575,7 +1583,7 @@ void TreesObject::PrepareAnimate()
 
 void TreesObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	//CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 
