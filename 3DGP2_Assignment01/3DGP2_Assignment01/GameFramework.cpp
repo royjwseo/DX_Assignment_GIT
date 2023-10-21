@@ -33,7 +33,12 @@ CGameFramework::CGameFramework()
 
 	m_pScene = NULL;
 	m_pPlayer = NULL;
-
+#ifdef _WITH_DIRECT2D
+	for (int i = 0; i < m_nSwapChainBuffers; i++) {
+		m_ppd3d11WrappedBackBuffers[i] = NULL;
+		m_ppd2dRenderTargets[i] = NULL;
+	}
+#endif
 	_tcscpy_s(m_pszFrameRate, _T("GardenProject ["));
 }
 
@@ -53,7 +58,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateDepthStencilView();
 
 	HRESULT h = CoInitialize(NULL);
-
+#ifdef _WITH_DIRECT2D
+	CreateDirect2DDevice();
+#endif
 	BuildObjects();
 
 	return(true);
@@ -172,6 +179,113 @@ void CGameFramework::CreateDirect3DDevice()
 
 	if (pd3dAdapter) pd3dAdapter->Release();
 }
+
+#ifdef _WITH_DIRECT2D
+void CGameFramework::CreateDirect2DDevice()
+{
+	UINT nD3D11DeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#if defined(_DEBUG) || defined(DBG)
+	nD3D11DeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	ID3D11Device* pd3d11Device = NULL;
+	ID3D12CommandQueue* ppd3dCommandQueues[] = { m_pd3dCommandQueue };
+	HRESULT hResult = ::D3D11On12CreateDevice(m_pd3dDevice, nD3D11DeviceFlags, NULL, 0, reinterpret_cast<IUnknown**>(ppd3dCommandQueues), _countof(ppd3dCommandQueues), 0, &pd3d11Device, &m_pd3d11DeviceContext, NULL);
+	hResult = pd3d11Device->QueryInterface(__uuidof(ID3D11On12Device), (void**)&m_pd3d11On12Device);
+	if (pd3d11Device) pd3d11Device->Release();
+
+	D2D1_FACTORY_OPTIONS nD2DFactoryOptions = { D2D1_DEBUG_LEVEL_NONE };
+#if defined(_DEBUG) || defined(DBG)
+	nD2DFactoryOptions.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+	ID3D12InfoQueue* pd3dInfoQueue = NULL;
+	if (SUCCEEDED(m_pd3d12Device->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
+	{
+		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
+		{
+			D3D12_MESSAGE_SEVERITY_INFO,
+		};
+
+		D3D12_MESSAGE_ID pd3dDenyIds[] =
+		{
+			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
+		};
+
+		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
+		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);
+		d3dInforQueueFilter.DenyList.pSeverityList = pd3dSeverities;
+		d3dInforQueueFilter.DenyList.NumIDs = _countof(pd3dDenyIds);
+		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
+
+		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
+	}
+	pd3dInfoQueue->Release();
+#endif
+
+	hResult = ::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3), &nD2DFactoryOptions, (void**)&m_pd2dFactory);
+
+	IDXGIDevice* pdxgiDevice = NULL;
+	hResult = m_pd3d11On12Device->QueryInterface(__uuidof(IDXGIDevice), (void**)&pdxgiDevice);
+	hResult = m_pd2dFactory->CreateDevice(pdxgiDevice, &m_pd2dDevice);
+	hResult = m_pd2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &m_pd2dDeviceContext);
+	hResult = ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&m_pdWriteFactory);
+	if (pdxgiDevice) pdxgiDevice->Release();
+
+	m_pd2dDeviceContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"HY견고딕", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 54.0f, L"en-US", &m_pdwFont);
+	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 1.0f), &m_pd2dbrText);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 8, m_pdwFont, 4096.0f, 4096.0f, &m_pdwTextLayout);
+
+	float fDpi = (float)GetDpiForWindow(m_hWnd);
+	D2D1_BITMAP_PROPERTIES1 d2dBitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), fDpi, fDpi);
+
+	for (UINT i = 0; i < m_nSwapChainBuffers; i++)
+	{
+		D3D11_RESOURCE_FLAGS d3d11Flags = { D3D11_BIND_RENDER_TARGET };
+		m_pd3d11On12Device->CreateWrappedResource(m_ppd3dSwapChainBackBuffers[i], &d3d11Flags, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, IID_PPV_ARGS(&m_ppd3d11WrappedBackBuffers[i]));
+		IDXGISurface* pdxgiSurface = NULL;
+		m_ppd3d11WrappedBackBuffers[i]->QueryInterface(__uuidof(IDXGISurface), (void**)&pdxgiSurface);
+		m_pd2dDeviceContext->CreateBitmapFromDxgiSurface(pdxgiSurface, &d2dBitmapProperties, &m_ppd2dRenderTargets[i]);
+		if (pdxgiSurface) pdxgiSurface->Release();
+	}
+
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	CoInitialize(NULL);
+	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
+
+	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection);
+
+	IWICBitmapDecoder* pwicBitmapDecoder;
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/Digital_Num2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	IWICBitmapFrameDecode* pwicFrameDecode;
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	
+	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
+
+	m_pd2dfxEdgeDetection->SetInputEffect(0, m_pd2dfxBitmapSource);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
+	if (pwicFrameDecode) pwicFrameDecode->Release();
+#endif
+}
+#endif
 
 void CGameFramework::CreateCommandQueueAndList()
 {
@@ -328,9 +442,26 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeSwapChainState();
 			break;
 
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 		case VK_F5:
+		{
+			float fValue = 0;
+			m_pd2dfxGaussianBlur->GetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, &fValue);
+			m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, fValue + 0.f);
+			m_nDrawEffectImage = 0;
 			break;
-
+		}
+		case VK_F6:
+			m_nDrawEffectImage = 1;
+			break;
+		case VK_F7:
+			m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+			m_nDrawEffectImage = 0;
+			break;
+		case VK_F8:
+			//png_x += 150.f;
+			break;
+#endif
 		default:
 			break;
 		}
@@ -374,7 +505,34 @@ void CGameFramework::OnDestroy()
 	ReleaseObjects();
 
 	::CloseHandle(m_hFenceEvent);
+#ifdef _WITH_DIRECT2D
+	if (m_pd2dbrBackground) m_pd2dbrBackground->Release();
+	if (m_pd2dbrBorder) m_pd2dbrBorder->Release();
+	if (m_pdwFont) m_pdwFont->Release();
+	if (m_pdwTextLayout) m_pdwTextLayout->Release();
+	if (m_pd2dbrText) m_pd2dbrText->Release();
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	if (m_pd2dfxBitmapSource) m_pd2dfxBitmapSource->Release();
+	if (m_pd2dfxGaussianBlur) m_pd2dfxGaussianBlur->Release();
+	if (m_pd2dfxEdgeDetection) m_pd2dfxEdgeDetection->Release();
+	if (m_pd2dsbDrawingState) m_pd2dsbDrawingState->Release();
+	if (m_pwicFormatConverter) m_pwicFormatConverter->Release();
+	if (m_pwicImagingFactory) m_pwicImagingFactory->Release();
+#endif
 
+	if (m_pd2dDeviceContext) m_pd2dDeviceContext->Release();
+	if (m_pd2dDevice) m_pd2dDevice->Release();
+	if (m_pdWriteFactory) m_pdWriteFactory->Release();
+	if (m_pd3d11On12Device) m_pd3d11On12Device->Release();
+	if (m_pd3d11DeviceContext) m_pd3d11DeviceContext->Release();
+	if (m_pd2dFactory) m_pd2dFactory->Release();
+
+	for (int i = 0; i < m_nSwapChainBuffers; i++)
+	{
+		if (m_ppd3d11WrappedBackBuffers[i]) m_ppd3d11WrappedBackBuffers[i]->Release();
+		if (m_ppd2dRenderTargets[i]) m_ppd2dRenderTargets[i]->Release();
+	}
+#endif
 	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 
@@ -564,7 +722,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
@@ -599,20 +757,118 @@ void CGameFramework::FrameAdvance()
 	UpdateShaderVariables();
 	m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
+
+
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
+#ifndef _WITH_DIRECT2D
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+#endif
 
 	hResult = m_pd3dCommandList->Close();
 
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+#ifdef _WITH_DIRECT2D
+	//Direct2D Drawing
+	m_pd2dDeviceContext->SetTarget(m_ppd2dRenderTargets[m_nSwapChainBufferIndex]);
+	ID3D11Resource* ppd3dResources[] = { m_ppd3d11WrappedBackBuffers[m_nSwapChainBufferIndex] };
+	m_pd3d11On12Device->AcquireWrappedResources(ppd3dResources, _countof(ppd3dResources));
+
+	m_pd2dDeviceContext->BeginDraw();
+	D2D1_MATRIX_3X2_F scaleMatrix = D2D1::Matrix3x2F::Scale(0.05f, 0.05f);
+	m_pd2dDeviceContext->SetTransform(scaleMatrix);
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	//FRAME_BUFFER_WIDTH		1280
+	//FRAME_BUFFER_HEIGHT		1024   가로 150, 세로213
+	elapsedTimeInSeconds += m_GameTimer.GetTimeElapsed();
+	
+	
+	if (elapsedTimeInSeconds >= 1.0f) {
+		
+		ones_x += 920;
+		ones_cnt++;
+		
+		if (ones_cnt == 10) {//일의 자리가 9이면 십의 자리 바꿔주기.
+
+			if (tens_cnt == 2) {
+				tens_x += 860;
+			}
+			else {
+			tens_x += 900;
+		}
+			tens_cnt++;
+			if (tens_cnt == 5) {
+			 tens_y += 1400.f;
+			 tens_x = 0;
+			}
+			if (tens_cnt == 6) {
+				tens_cnt = 0;
+				ones_cnt = 0;
+				ones_x = 0;
+				ones_y = 0;
+				tens_x = 0;
+				tens_y = 0;
+				mins_ones_x += 900.f;
+				mins_ones_cnt++;
+				if (mins_ones_cnt == 5) {
+					mins_ones_y += 1400.f;
+					mins_ones_x = 0;
+				}
+				else if (mins_ones_cnt == 10) {
+					mins_ones_y = 0;
+					mins_ones_x = 0;
+				}
+			}
+			 
+		 }
+		 if (ones_cnt == 5) {
+			 ones_y += 1400.f; 
+			 ones_x = 0;
+		 }
+		 else if (ones_cnt == 10) { 
+			 ones_cnt = 0;  //ones_cnt 는 1이면 숫자 2출력
+			 ones_x = 0;
+			 ones_y = 0;
+			
+		 }
+		 elapsedTimeInSeconds = 0.f;
+	 }
+	width_png = 900;
+	D2D_POINT_2F d2dPointones = { 13540, 0.0f }; //UI 위치 1024 / 0.05(scale) - 20480
+	D2D_POINT_2F d2dPointtens = { 12640, 0.0f };
+	D2D_POINT_2F d2dPointminsones = { 11340, 0.0f };
+	D2D_RECT_F d2dRectones = {ones_x, 100+ones_y, ones_x+width_png, 100+ones_y+1400.f }; // UI 크기
+	D2D_RECT_F d2dRecttens = { tens_x, 100+tens_y, tens_x + width_png, 100+tens_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+	D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png, 100 + mins_ones_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointones, &d2dRectones);
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointtens, &d2dRecttens);
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointminsones, &d2dRectminsones);
+
+#endif
+
+	scaleMatrix = D2D1::Matrix3x2F::Scale(1.2f, 1.2f);
+	m_pd2dDeviceContext->SetTransform(scaleMatrix);
+
+
+	D2D1_RECT_F rcLowerText = D2D1::RectF(0, 0, 1050, 70);
+	m_pd2dDeviceContext->DrawTextW(L":", (UINT32)wcslen(L":"), m_pdwFont, &rcLowerText, m_pd2dbrText);
+
+	m_pd2dDeviceContext->EndDraw();
+
+	m_pd3d11On12Device->ReleaseWrappedResources(ppd3dResources, _countof(ppd3dResources));
+
+	m_pd3d11DeviceContext->Flush();
+#endif
+
 
 	WaitForGpuComplete();
 

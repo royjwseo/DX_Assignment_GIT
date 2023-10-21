@@ -948,7 +948,7 @@ D3D12_SHADER_BYTECODE CBulletsShader::CreateVertexShader()
 
 D3D12_SHADER_BYTECODE CBulletsShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBullet", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
 CBillboardShader::CBillboardShader()

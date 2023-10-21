@@ -875,11 +875,11 @@ void CTankPlayer::FloatEffect(float fTimeElapsed)
 	
 		FloatEffectTimeElapsed += fTimeElapsed;
 		if (FloatEffectTimeElapsed < FloatUpDuration) {
-			Move(DIR_DOWN, 0.2, true);
+			Move(DIR_DOWN, 0.05, true);
 		}
 		else if (FloatEffectTimeElapsed < 2 * FloatUpDuration)
 		{
-			Move(DIR_UP, 0.2, true);
+			Move(DIR_UP, 0.05, true);
 
 		}
 		if (FloatEffectTimeElapsed >= 2 * FloatUpDuration)
