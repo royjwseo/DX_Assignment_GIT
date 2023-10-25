@@ -198,7 +198,7 @@ void CGameFramework::CreateDirect2DDevice()
 #if defined(_DEBUG) || defined(DBG)
 	nD2DFactoryOptions.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 	ID3D12InfoQueue* pd3dInfoQueue = NULL;
-	if (SUCCEEDED(m_pd3d12Device->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
+	if (SUCCEEDED(m_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
 	{
 		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
 		{
@@ -676,8 +676,8 @@ void CGameFramework::UpdateShaderVariables()
 	float fCurrentTime = m_GameTimer.GetTotalTime();
 	float fElapsedTime = m_GameTimer.GetTimeElapsed();
 
-	m_pd3dCommandList->SetGraphicsRoot32BitConstants(12, 1, &fCurrentTime, 0);
-	m_pd3dCommandList->SetGraphicsRoot32BitConstants(12, 1, &fElapsedTime, 1);
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(PARAMETER_TIME_CONSTANTS, 1, &fCurrentTime, 0);
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(PARAMETER_TIME_CONSTANTS, 1, &fElapsedTime, 1);
 
 
 }
@@ -722,7 +722,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(60.0f);
+	m_GameTimer.Tick(0.0f);
 
 	ProcessInput();
 
@@ -806,7 +806,7 @@ void CGameFramework::FrameAdvance()
 		}
 			tens_cnt++;
 			if (tens_cnt == 5) {
-			 tens_y += 1400.f;
+			 tens_y += 1330.f;
 			 tens_x = 0;
 			}
 			if (tens_cnt == 6) {
@@ -819,7 +819,7 @@ void CGameFramework::FrameAdvance()
 				mins_ones_x += 900.f;
 				mins_ones_cnt++;
 				if (mins_ones_cnt == 5) {
-					mins_ones_y += 1400.f;
+					mins_ones_y += 1415.f;
 					mins_ones_x = 0;
 				}
 				else if (mins_ones_cnt == 10) {
@@ -830,7 +830,7 @@ void CGameFramework::FrameAdvance()
 			 
 		 }
 		 if (ones_cnt == 5) {
-			 ones_y += 1400.f; 
+			 ones_y += 1405.f; 
 			 ones_x = 0;
 		 }
 		 else if (ones_cnt == 10) { 
@@ -845,8 +845,8 @@ void CGameFramework::FrameAdvance()
 	D2D_POINT_2F d2dPointones = { 13540, 0.0f }; //UI 위치 1024 / 0.05(scale) - 20480
 	D2D_POINT_2F d2dPointtens = { 12640, 0.0f };
 	D2D_POINT_2F d2dPointminsones = { 11340, 0.0f };
-	D2D_RECT_F d2dRectones = {ones_x, 100+ones_y, ones_x+width_png, 100+ones_y+1400.f }; // UI 크기
-	D2D_RECT_F d2dRecttens = { tens_x, 100+tens_y, tens_x + width_png, 100+tens_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+	D2D_RECT_F d2dRectones = {ones_x, 100+ones_y, ones_x+width_png, 100+ones_y+1415.f }; // UI 크기
+	D2D_RECT_F d2dRecttens = { tens_x, 100+tens_y, tens_x + width_png, 100+tens_y + 1415.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 	D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png, 100 + mins_ones_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointones, &d2dRectones);

@@ -83,6 +83,7 @@ private:
 	IDWriteFactory* m_pdWriteFactory = NULL;
 	ID2D1Device2* m_pd2dDevice = NULL;
 	ID2D1DeviceContext2* m_pd2dDeviceContext = NULL;
+	ID2D1DeviceContext2* m_pd2dDeviceContext2 = NULL;
 
 	ID3D11Resource* m_ppd3d11WrappedBackBuffers[m_nSwapChainBuffers];
 	ID2D1Bitmap1* m_ppd2dRenderTargets[m_nSwapChainBuffers];

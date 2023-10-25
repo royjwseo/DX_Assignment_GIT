@@ -2,9 +2,10 @@
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
-#include "stdafx.h"
+#include "Stdafx.h"
 #include "Object.h"
 #include "Shader.h"
+#include "Scene.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -167,7 +168,8 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		if (!bDuplicated)
 		{
 			LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, m_ppstrTextureNames[nIndex], RESOURCE_TEXTURE2D, nIndex);
-			pShader->CreateShaderResourceView(pd3dDevice, this, nIndex);
+		CScene::CreateShaderResourceView(pd3dDevice, this, nIndex);
+		//pShader->CreateShaderResourceView(pd3dDevice, this, nIndex);
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 			m_pnRootParameterIndices[nIndex] = PARAMETER_STANDARD_TEXTURE + nIndex;
 #endif
@@ -922,9 +924,9 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, PARAMETER_SKYBOX_CUBE_TEXTURE);
-
+	//pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, PARAMETER_SKYBOX_CUBE_TEXTURE);
+	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, PARAMETER_SKYBOX_CUBE_TEXTURE);
 	CMaterial* pSkyBoxMaterial = new CMaterial();
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture);
 	pSkyBoxMaterial->SetShader(pSkyBoxShader);
@@ -1126,13 +1128,13 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//서술자 힙을 생성하고 -> 그를 채울 뷰들을 만들고 -> 루트시그니쳐에 바인딩
-	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
+	//pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 	// 스카이박스 실습에서는 게임오브젝트를 32비트 상수로 하여 자원을 한비트마다 세세하게 설정가능. 낭비 자원 체크 안해도됨. 
 	// 터레인 실습에서는 게임오브젝트를 뷰로 하여 RangeType으로 나누어 또 세세하게 정해줌 ->공부ㅜ필요
 
 	//여기서 우리가 셰이더에 건내줄 상수버퍼뷰를 만든다.
-	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
-
+	//pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, PARAMETER_TERRAIN_TEXTURES);
 
 	CMaterial* pTerrainMaterial = new CMaterial();
 	pTerrainMaterial->SetShader(pTerrainShader);
@@ -1210,7 +1212,7 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z)&&!Collided) {
+	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z) && !Collided) {
 		if (!m_pPlayer->machine_mode)
 			m_pPlayer->bullet_camera_mode = false; //이건 껏다 켰다 하는 bool 값 
 		Reset();
@@ -1225,7 +1227,7 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 			Reset();
 		}
 	}
-	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)&&!Collided) {
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime) && !Collided) {
 		if (!m_pPlayer->machine_mode)
 			m_pPlayer->bullet_camera_mode = false; //머신 모드가 아니고 bulletcameramode가 아닐때 쏘면 bulletcameramode로 바뀜.
 		Reset();
@@ -1247,23 +1249,23 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4Transform._31 = mtxLookAt._13; m_xmf4x4Transform._32 = mtxLookAt._23; m_xmf4x4Transform._33 = mtxLookAt._33;
 }
 
-CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,wchar_t* pfilePath,float width,float height) : CGameObject(0, 1)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath, float width, float height) : CGameObject(0, 1)
 {
-	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, width, height, 0.0f,0.f,0.f,0.f);
+	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, width, height, 0.0f, 0.f, 0.f, 0.f);
 	SetMesh(pBillboardMesh);
-	
-	
+
+
 
 	CTexture* pBillboardTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList,pfilePath, RESOURCE_TEXTURE2D, 0);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pfilePath, RESOURCE_TEXTURE2D, 0);
 
 	CBillboardShader* pBillboardShader = new CBillboardShader();
 	pBillboardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	//pBillboardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	pBillboardShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pBillboardShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 16);
-
+	//pBillboardShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+//	pBillboardShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 16);
+	CScene::CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, PARAMETER_2D_TEXTURE);
 	CMaterial* pBillboardMaterial = new CMaterial();
 	pBillboardMaterial->SetTexture(pBillboardTexture);
 	pBillboardMaterial->SetShader(pBillboardShader);
@@ -1276,7 +1278,7 @@ CBillboardObject::~CBillboardObject()
 {
 }
 
-void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera,float distance)
+void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera, float distance)
 {
 
 	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
@@ -1344,9 +1346,9 @@ CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pWaterShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pWaterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	pWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	pWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
-
+//	pWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	//pWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
+	CScene::CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, PARAMETER_WATER_TEXTURES);
 
 	CMaterial* pWaterMaterial = new CMaterial();
 	pWaterMaterial->SetTexture(pWaterTexture);
@@ -1360,7 +1362,7 @@ CTerrainWater::~CTerrainWater()
 {
 }
 
-CRippleWater::CRippleWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal,void* pContext) : CGameObject(0, 1)
+CRippleWater::CRippleWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal, void* pContext) : CGameObject(0, 1)
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
@@ -1403,10 +1405,10 @@ CRippleWater::CRippleWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pRippleWaterShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pRippleWaterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	pRippleWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	pRippleWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
+	//pRippleWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	//pRippleWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
 
-
+	CScene::CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, PARAMETER_WATER_TEXTURES);
 	CMaterial* pWaterMaterial = new CMaterial();
 	pWaterMaterial->SetTexture(pWaterTexture);
 	pWaterMaterial->SetShader(pRippleWaterShader);
@@ -1418,7 +1420,7 @@ CRippleWater::~CRippleWater()
 {
 }
 
-CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,void *pContext) : CGameObject(0, 0)
+CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext) : CGameObject(0, 0)
 {
 	SetPlayerUpdatedContext(pContext);
 }
@@ -1431,7 +1433,7 @@ void CTankObject::Update(float fTimeElapsed)
 {
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 	MoveRandom(fTimeElapsed);
-	
+
 	RotateWheels(fTimeElapsed);
 	if (m_pTankObjectUpdatedContext) {
 		UpdateTimeElapsed += fTimeElapsed;
@@ -1444,7 +1446,7 @@ void CTankObject::Update(float fTimeElapsed)
 	}
 	if (Float_in_Water)
 		FloatEffect(fTimeElapsed);
-	
+
 }
 
 void CTankObject::UpdateTankPosition()
@@ -1478,7 +1480,7 @@ void CTankObject::UpdateTankPosition()
 
 void CTankObject::MoveRandom(float fTimeElapsed)
 {
-	float fDistance = 5.f; 
+	float fDistance = 5.f;
 
 	// 랜덤 방향으로 이동
 	//float fRandX = dist(mt);//-1~1사이
@@ -1491,14 +1493,14 @@ void CTankObject::MoveRandom(float fTimeElapsed)
 	{
 		Turning_Direction = true;
 		Rotate(0.f, RotationSpeed, 0.f);
-		
+
 	}
 	if (MoveStrafeTimeElapsed >= 1.3 * MoveStrafeDuration)
 	{
 		Turning_Direction = false;
 		MoveStrafeTimeElapsed = 0.0f;
 	}
-	
+
 
 	//if(!Turning_Direction)
 
@@ -1520,7 +1522,7 @@ void CTankObject::RotateWheels(float fTimeElapsed)
 
 void CTankObject::FloatEffect(float fTimeElapsed)
 {
-	
+
 
 	FloatEffectTimeElapsed += fTimeElapsed;
 	if (FloatEffectTimeElapsed < FloatUpDuration) {
@@ -1587,20 +1589,20 @@ void TreesObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 }
 
 
-CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* filePath,int nRows,int nCols) :CGameObject(0, 1)
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* filePath, int nRows, int nCols) :CGameObject(0, 1)
 {
-	
+
 	m_bActive = false;
 	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	SetMesh(pSpriteMesh);
-	CTexture* pMultiSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1,nRows,nCols);
+	CTexture* pMultiSpriteTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, nRows, nCols);
 	pMultiSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, filePath, RESOURCE_TEXTURE2D, 0);
 
 	CMultiSpriteObjectsShader* pMultiSpriteShader = new CMultiSpriteObjectsShader();
 	pMultiSpriteShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pMultiSpriteShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	pMultiSpriteShader->CreateShaderResourceViews(pd3dDevice, pMultiSpriteTexture, 0, 16);
-
+	//pMultiSpriteShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//pMultiSpriteShader->CreateShaderResourceViews(pd3dDevice, pMultiSpriteTexture, 0, 16);
+	CScene::CreateShaderResourceViews(pd3dDevice, pMultiSpriteTexture, 0, PARAMETER_2D_TEXTURE);
 	CMaterial* pMultiSpriteMaterial = new CMaterial();
 	pMultiSpriteMaterial->SetTexture(pMultiSpriteTexture);
 	pMultiSpriteMaterial->SetShader(pMultiSpriteShader);
@@ -1624,7 +1626,7 @@ void CMultiSpriteObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 void CMultiSpriteObject::ReleaseShaderVariables()
 {
 	if (m_pd3dcbObjectTexture) {
-		m_pd3dcbObjectTexture->Unmap(0,NULL);
+		m_pd3dcbObjectTexture->Unmap(0, NULL);
 		m_pd3dcbObjectTexture->Release();
 
 	}
@@ -1645,7 +1647,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	
+
 	if (m_nMaterials > 0) {
 		for (int i = 0; i < m_nMaterials; i++) {
 			if (m_ppMaterials[i]->m_pTexture) {
@@ -1653,12 +1655,12 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 				XMStoreFloat4x4(m_pcbMappedObjectTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_pTexture->m_xmf4x4Texture)));
 				D3D12_GPU_VIRTUAL_ADDRESS d3dcbObjectTextureGpuVirtualAddress = m_pd3dcbObjectTexture->GetGPUVirtualAddress();
-				pd3dCommandList->SetGraphicsRootConstantBufferView(15, d3dcbObjectTextureGpuVirtualAddress); //
+				pd3dCommandList->SetGraphicsRootConstantBufferView(PARAMETER_SPRITE_ANIMATION_MATRIX, d3dcbObjectTextureGpuVirtualAddress); //
 
 			}
 		}
 	}
-		
+
 	CGameObject::Render(pd3dCommandList, pCamera);
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);

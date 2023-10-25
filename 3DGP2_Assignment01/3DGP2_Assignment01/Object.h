@@ -207,7 +207,7 @@ public:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
-	
+
 
 	bool Cactus_hit = false;
 
@@ -282,7 +282,7 @@ public:
 	void SetActive(bool bActive) { m_bActive = bActive; }
 	void SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
 	void SetNewUp(XMFLOAT3 newUp);
-	
+
 public:
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader);
 
@@ -415,7 +415,7 @@ public:
 	virtual ~CBulletObject();
 
 public:
-	virtual void Animate(float fElapsedTime,void *pContext);
+	virtual void Animate(float fElapsedTime, void* pContext);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 400.0f;
 	float						m_fMovingDistance = 0.0f;
@@ -440,12 +440,12 @@ public:
 
 class CBillboardObject :public CGameObject {
 public:
-	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath,float width,float height);
+	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath, float width, float height);
 	virtual ~CBillboardObject();
 
 public:
 
-	virtual void Animate(float fTimeElapsed, CCamera* pCamera , float distance);
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera, float distance);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
 
 };
@@ -482,7 +482,7 @@ private:
 	int								m_nLength;
 
 	XMFLOAT3						m_xmf3Scale;
-	
+
 public:
 	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
 	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
@@ -492,7 +492,7 @@ public:
 class CTankObject : public CGameObject
 {
 public:
-	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,void* pContext);
+	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
 	virtual ~CTankObject();
 
 private:
@@ -500,7 +500,7 @@ private:
 	array<CGameObject*, 16> m_pWheel{};
 	CGameObject* m_pTurret = NULL;
 	CGameObject* m_pPoshin = NULL;
-	
+
 	// Terrain 저장 변수
 	LPVOID						m_pTankObjectUpdatedContext = NULL;
 
@@ -526,7 +526,7 @@ public:
 public:
 	//Terrain 받아오는 함수
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pTankObjectUpdatedContext = pContext; }
-	
+
 	//--
 	void MoveRandom(float fTimeElapsed);
 	void RotateWheels(float fTimeElapsed);
@@ -546,20 +546,20 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* filePath , int nRows, int nCols);
+	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* filePath, int nRows, int nCols);
 	virtual ~CMultiSpriteObject();
 
 
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;
-	
+
 
 	ID3D12Resource* m_pd3dcbObjectTexture = NULL;
 	XMFLOAT4X4* m_pcbMappedObjectTexture = NULL;
 
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-virtual void ReleaseShaderVariables();
+	virtual void ReleaseShaderVariables();
 
 
 	virtual void Animate(float fTimeElapsed);
