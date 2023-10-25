@@ -54,7 +54,7 @@ cbuffer cbObjectTextureInfo :register(b6)
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
-//#define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
+#define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 Texture2D gtxtAlbedoTexture : register(t6);
@@ -397,7 +397,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 		float4 cDetailTexColors[3];
 		cDetailTexColors[0] = gtxtTerrainDetailTexture[0].Sample(gssWrap, input.uv1 * 1.0f);
 		cDetailTexColors[1] = gtxtTerrainDetailTexture[1].Sample(gssWrap, input.uv1 * 0.75f);
-		cDetailTexColors[2] = gtxtTerrainDetailTexture[2].Sample(gssWrap, input.uv1*0.5f);
+		cDetailTexColors[2] = gtxtTerrainDetailTexture[2].Sample(gssWrap, input.uv1 * 0.5f);
 
 
 		float4 cColor = cBaseTexColor * cDetailTexColors[0];
@@ -561,7 +561,7 @@ VS_RIPPLE_WATER_OUTPUT VSRippleWater(VS_RIPPLE_WATER_INPUT input)
 	output.position = mul(float4(input.position, 1.0f), gmtxGameObject);
 	if (180.0f < output.position.y) output.position.y = 180.0f;
 	output.position = mul(mul(output.position, gmtxView), gmtxProjection);
-	
+
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 
 	//	output.color = input.color;

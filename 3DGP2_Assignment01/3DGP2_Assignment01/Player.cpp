@@ -506,7 +506,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	
+	//m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 
 	CGameObject* pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainTank.bin", m_pShader);
 	SetChild(pGameObject);
@@ -596,7 +596,7 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
 		}
 	}
-	if (Fired_Bullet && !is_Going ) {
+	if (Fired_Bullet && !is_Going) {
 		FireEffect(fTimeElapsed);
 	}
 	if (Shake) {
@@ -641,8 +641,8 @@ void CTankPlayer::Update(float fTimeElapsed)
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	
-	
+
+
 	Move(m_xmf3Velocity, false);
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 	if (m_pPlayerUpdatedContext) {
@@ -786,6 +786,11 @@ CCamera* CTankPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) {
 
 	return(m_pCamera);
 }
+void CTankPlayer::ReleaseUploadBuffers()
+{ 
+	if (m_pPlayerShader)m_pPlayerShader->ReleaseUploadBuffers();
+	CGameObject::ReleaseUploadBuffers();
+}
 void CTankPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_pPlayerShader)m_pPlayerShader->Render(pd3dCommandList, pCamera);
@@ -835,7 +840,7 @@ void CTankPlayer::UpdateTankPosition(float fTimeElapsed)
 		else {
 			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
 			xmf3PlayerPosition.y = fHeight;
-			Float_in_Water=false;
+			Float_in_Water = false;
 		}
 		SetPosition(xmf3PlayerPosition);
 	}
@@ -872,22 +877,22 @@ void CTankPlayer::ShakeEffect(float fTimeElapsed)
 
 void CTankPlayer::FloatEffect(float fTimeElapsed)
 {
-	
-		FloatEffectTimeElapsed += fTimeElapsed;
-		if (FloatEffectTimeElapsed < FloatUpDuration) {
-			Move(DIR_DOWN, 0.05, true);
-		}
-		else if (FloatEffectTimeElapsed < 2 * FloatUpDuration)
-		{
-			Move(DIR_UP, 0.05, true);
 
-		}
-		if (FloatEffectTimeElapsed >= 2 * FloatUpDuration)
-		{
-			FloatEffectTimeElapsed = 0.0f;
-			
-		}
-	
+	FloatEffectTimeElapsed += fTimeElapsed;
+	if (FloatEffectTimeElapsed < FloatUpDuration) {
+		Move(DIR_DOWN, 0.05, true);
+	}
+	else if (FloatEffectTimeElapsed < 2 * FloatUpDuration)
+	{
+		Move(DIR_UP, 0.05, true);
+
+	}
+	if (FloatEffectTimeElapsed >= 2 * FloatUpDuration)
+	{
+		FloatEffectTimeElapsed = 0.0f;
+
+	}
+
 }
 
 void CTankPlayer::FireEffect(float fTimeElapsed)

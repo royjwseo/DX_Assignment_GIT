@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-
 CDescriptorHeap* CScene::m_pDescriptorHeap = NULL;
 
 CDescriptorHeap::CDescriptorHeap()
@@ -157,7 +156,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf3Position = XMFLOAT3(3212.0f, 180.0f, 3212.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
-	
+
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 400.0f;
@@ -170,14 +169,14 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_fFalloff = 8.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(30.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(15.0f));
-	
+
 	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	
+
 	m_pLights[3].m_bEnable = true;
 	m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights[3].m_fRange = 300.0f;
@@ -200,18 +199,18 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	BuildDefaultLightsAndMaterials();
-
+	
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice,0,4+9+3+5+2+4+5 +3+5+3+1+30); //총알(4) 건물들3가지(9) 윈드밀(3) 탱크(5), 돌식물(2) 나무(4) 플레이어 (5)
-	 //물(3) 지형 (5) 스프라이트 3 스카이박스 1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 9 + 3 + 5 + 2 + 4 + 5 + 3 + 5 + 3 + 1 + 60); //총알(4) 건물들3가지(9) 윈드밀(3) 탱크(5), 돌식물(2) 나무(4) 플레이어 (5)
+	//물(3) 지형 (5) 스프라이트 3 스카이박스 1
 
 	m_nDotBillboard = 8;
 	m_ppDotBillboard = new CBillboardObject * [m_nDotBillboard];
 	for (int i = 0; i < 5; i++) {
-		m_ppDotBillboard[i] =new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",3,3);;
+		m_ppDotBillboard[i] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds", 3, 3);;
 	}
-	m_ppDotBillboard[5] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds",10.0f,10.0f);
-	m_ppDotBillboard[6]= new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds",10.0f,10.0f);//Dot2->Red
+	m_ppDotBillboard[5] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot1.dds", 10.0f, 10.0f);
+	m_ppDotBillboard[6] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot2.dds", 10.0f, 10.0f);//Dot2->Red
 	m_ppDotBillboard[7] = new CBillboardObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Dot_Sight.dds", 10.0f, 10.0f);//Dot2->Red
 
 
@@ -219,7 +218,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nSpriteAnimation = 3;
 	m_ppSprite = new CMultiSpriteObject * [m_nSpriteAnimation];
 	m_ppSprite[0] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/MyExplosive_01.dds", 8, 8); //원형 폭발 제일 뒤 그려짐
-	m_ppSprite[1] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/MyExplosive_02.dds",8,8); 
+	m_ppSprite[1] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/MyExplosive_02.dds", 8, 8);
 	m_ppSprite[2] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Explosion_6x6.dds", 6, 6); //크기와 타이밍때문에 제일 뒤에 보임
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -313,11 +312,12 @@ void CScene::ReleaseObjects()
 		}
 		delete m_ppDotBillboard;
 	}
-	if (m_ppSprite) { 
+	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->Release();
 		}
-		delete m_ppSprite; }
+		delete m_ppSprite;
+	}
 	/*if (m_ppGameObjects)
 	{
 		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
@@ -336,6 +336,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -400,7 +401,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 22; 
+	pd3dDescriptorRanges[10].BaseShaderRegister = 22;
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -495,104 +496,98 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[16].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
-	/*pd3dRootParameters[15].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[15].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[15].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[10];
-	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;*/
-
 #else
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[5];
-
+	
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 6; //t6: gtxtStandardTextures[7] //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal ~t12
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
+	
 	pd3dDescriptorRanges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[1].NumDescriptors = 1;
 	pd3dDescriptorRanges[1].BaseShaderRegister = 13; //t13: gtxtSkyBoxTexture
 	pd3dDescriptorRanges[1].RegisterSpace = 0;
 	pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
+	
 	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[2].NumDescriptors = 5;
 	pd3dDescriptorRanges[2].BaseShaderRegister = 14; //t14: gtxtTerrainBaseTexture~t18
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
+	
 	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[3].NumDescriptors = 3;
 	pd3dDescriptorRanges[3].BaseShaderRegister = 19; //t19: gtxtWaterBaseTexture, t20: gtxtWaterDetailTexture, t21: gtxtWaterDetailAlphaTexture
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
+	
 	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[4].NumDescriptors = 1;
 	pd3dDescriptorRanges[4].BaseShaderRegister = 22;
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-
+	
+	
 	D3D12_ROOT_PARAMETER pd3dRootParameters[11]; //17-> 11 7개짜리 1개로묶음
-
+	
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 33;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 5; //Lights
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);//STANDARD 7개
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
+	
 	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[1]);//SKYBOX
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
+	
 	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; //비용 1
 	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[2]);//TERRAIN
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
+	
 	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; //비용 1
 	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[3];//WATER
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
+	
 	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; //비용 1
 	pd3dRootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];//2D
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
+	
 	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;  //비용 2
 	pd3dRootParameters[8].Constants.Num32BitValues = 2; //Time, ElapsedTime
 	pd3dRootParameters[8].Constants.ShaderRegister = 3; //Time
 	pd3dRootParameters[8].Constants.RegisterSpace = 0;
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;  //비용 2 루트 상수에서 CBV로 바꿈.
 	pd3dRootParameters[9].Constants.ShaderRegister = 4; //WaterTextureAnimation 행렬
 	pd3dRootParameters[9].Constants.RegisterSpace = 0;
 	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;  //비용 2 루트 상수에서 CBV로 바꿈.
 	pd3dRootParameters[10].Constants.ShaderRegister = 6; //TextureAnimationSpriteImage 행렬
 	pd3dRootParameters[10].Constants.RegisterSpace = 0;
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
 #endif
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
@@ -672,6 +667,7 @@ void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 
 
+
 	XMStoreFloat4x4(m_pcbMappedWaterAnimation, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4WaterAnimation)));
 
 
@@ -694,13 +690,18 @@ void CScene::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
-	
+
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			m_ppSprite[i]->ReleaseUploadBuffers();
 		}
 	}
-		
+	if (m_ppDotBillboard) {
+		for (int i = 0; i < m_nDotBillboard; i++) {
+			m_ppDotBillboard[i]->ReleaseUploadBuffers();
+		}
+	}
+
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	//	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	if (m_pTerrainWater) m_pTerrainWater->ReleaseUploadBuffers();
@@ -852,12 +853,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 
 	if (m_ppDotBillboard) {
-		
+
 		for (int i = 0; i < 5; i++) {
-			m_ppDotBillboard[i]->Animate(fTimeElapsed, m_pPlayer->GetCamera(),35*(i+1));
+			m_ppDotBillboard[i]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 35 * (i + 1));
 		}
 		m_ppDotBillboard[5]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
-		m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(),200.f);
+		m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 		m_ppDotBillboard[7]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 	}
 
@@ -873,7 +874,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 					CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
 					for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
 					m_ppSprite[i]->m_bActive = false;
-				
+
 				}
 			}
 		}
@@ -888,7 +889,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		XMFLOAT3 Tankpos = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetPosition();
 		m_pLights[1].m_xmf3Position = Tankpos;
 		m_pLights[1].m_xmf3Direction = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
-		
+
 	}
 
 	m_xmf4x4WaterAnimation._31 += fTimeElapsed * 0.00125f;
@@ -1229,7 +1230,7 @@ void CScene::CheckEnemyTankByBulletCollisions()
 						m_ppSprite[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 					}
 				}
-			
+
 			}
 		}
 	}
@@ -1266,7 +1267,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	//static const int IntervalMilliseconds = 2000; 
 	pd3dCommandList->SetDescriptorHeaps(1, &m_pDescriptorHeap->m_pd3dCbvSrvDescriptorHeap);
 
-	
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
@@ -1275,13 +1275,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbWaterAnimationGpuVirtualAddress = m_pd3dcbWaterAnimation->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(PARAMETER_WATER_ANIMATION_MATRIX, d3dcbWaterAnimationGpuVirtualAddress); //WaterAnimationMatrix
-	
+
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	
+
 	if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
 	if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
-//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+	//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
@@ -1289,15 +1289,15 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 				/*auto currentTime = std::chrono::steady_clock::now();
 				auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);*/
 
-			
+
 				m_ppSprite[i]->Render(pd3dCommandList, pCamera);
 			}
 		}
 	}
-	
+
 	if (m_ppDotBillboard) {
 		if (aiming_point_mode == 0) {
-			for (int i = 0; i < m_nDotBillboard-1; i++) {
+			for (int i = 0; i < m_nDotBillboard - 1; i++) {
 				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
 			}
 		}
@@ -1306,11 +1306,11 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
 			}
 		}
-		else if(aiming_point_mode==2) {
+		else if (aiming_point_mode == 2) {
 			m_ppDotBillboard[7]->Render(pd3dCommandList, pCamera);
 		}
-		
-		
+
+
 	}
 }
 

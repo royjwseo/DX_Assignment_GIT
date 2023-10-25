@@ -270,7 +270,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	
+
 	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
 
@@ -609,7 +609,7 @@ void CGameFramework::ProcessInput()
 		static std::chrono::steady_clock::time_point lastSpacePressTime = std::chrono::steady_clock::now();
 		static const int spacePressIntervalMilliseconds = 600; // 스페이스바 입력 간격 (1000 은예: 1초)
 
-		if (pKeysBuffer[VK_SPACE] & 0xF0&& !static_cast<CTankPlayer*>(m_pPlayer)->is_Going)
+		if (pKeysBuffer[VK_SPACE] & 0xF0 && !static_cast<CTankPlayer*>(m_pPlayer)->is_Going)
 		{
 			// 스페이스바가 눌린 경우
 			auto currentTime = std::chrono::steady_clock::now();
@@ -623,7 +623,7 @@ void CGameFramework::ProcessInput()
 				{
 					if (!m_pPlayer->bullet_camera_mode)
 						static_cast<CTankPlayer*>(m_pPlayer)->FireBullet(NULL);
-					
+
 
 					m_pPlayer->bullet_camera_mode = true;
 				}
@@ -665,7 +665,7 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) { m_pPlayer->Move(dwDirection, 100.f* m_GameTimer.GetTimeElapsed(), true); }
+			if (dwDirection) { m_pPlayer->Move(dwDirection, 100.f * m_GameTimer.GetTimeElapsed(), true); }
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -722,7 +722,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
@@ -789,25 +789,25 @@ void CGameFramework::FrameAdvance()
 	//FRAME_BUFFER_WIDTH		1280
 	//FRAME_BUFFER_HEIGHT		1024   가로 150, 세로213
 	elapsedTimeInSeconds += m_GameTimer.GetTimeElapsed();
-	
-	
+
+
 	if (elapsedTimeInSeconds >= 1.0f) {
-		
+
 		ones_x += 920;
 		ones_cnt++;
-		
+
 		if (ones_cnt == 10) {//일의 자리가 9이면 십의 자리 바꿔주기.
 
 			if (tens_cnt == 2) {
 				tens_x += 860;
 			}
 			else {
-			tens_x += 900;
-		}
+				tens_x += 900;
+			}
 			tens_cnt++;
 			if (tens_cnt == 5) {
-			 tens_y += 1330.f;
-			 tens_x = 0;
+				tens_y += 1400.f;
+				tens_x = 0;
 			}
 			if (tens_cnt == 6) {
 				tens_cnt = 0;
@@ -819,7 +819,7 @@ void CGameFramework::FrameAdvance()
 				mins_ones_x += 900.f;
 				mins_ones_cnt++;
 				if (mins_ones_cnt == 5) {
-					mins_ones_y += 1415.f;
+					mins_ones_y += 1400.f;
 					mins_ones_x = 0;
 				}
 				else if (mins_ones_cnt == 10) {
@@ -827,26 +827,26 @@ void CGameFramework::FrameAdvance()
 					mins_ones_x = 0;
 				}
 			}
-			 
-		 }
-		 if (ones_cnt == 5) {
-			 ones_y += 1405.f; 
-			 ones_x = 0;
-		 }
-		 else if (ones_cnt == 10) { 
-			 ones_cnt = 0;  //ones_cnt 는 1이면 숫자 2출력
-			 ones_x = 0;
-			 ones_y = 0;
-			
-		 }
-		 elapsedTimeInSeconds = 0.f;
-	 }
+
+		}
+		if (ones_cnt == 5) {
+			ones_y += 1400.f;
+			ones_x = 0;
+		}
+		else if (ones_cnt == 10) {
+			ones_cnt = 0;  //ones_cnt 는 1이면 숫자 2출력
+			ones_x = 0;
+			ones_y = 0;
+
+		}
+		elapsedTimeInSeconds = 0.f;
+	}
 	width_png = 900;
 	D2D_POINT_2F d2dPointones = { 13540, 0.0f }; //UI 위치 1024 / 0.05(scale) - 20480
 	D2D_POINT_2F d2dPointtens = { 12640, 0.0f };
 	D2D_POINT_2F d2dPointminsones = { 11340, 0.0f };
-	D2D_RECT_F d2dRectones = {ones_x, 100+ones_y, ones_x+width_png, 100+ones_y+1415.f }; // UI 크기
-	D2D_RECT_F d2dRecttens = { tens_x, 100+tens_y, tens_x + width_png, 100+tens_y + 1415.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+	D2D_RECT_F d2dRectones = { ones_x, 100 + ones_y, ones_x + width_png, 100 + ones_y + 1400.f }; // UI 크기
+	D2D_RECT_F d2dRecttens = { tens_x, 100 + tens_y, tens_x + width_png, 100 + tens_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 	D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png, 100 + mins_ones_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointones, &d2dRectones);

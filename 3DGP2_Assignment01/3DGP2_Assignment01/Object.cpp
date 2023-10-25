@@ -2,7 +2,7 @@
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
-#include "Stdafx.h"
+#include "stdafx.h"
 #include "Object.h"
 #include "Shader.h"
 #include "Scene.h"
@@ -11,6 +11,8 @@
 //
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
 {
+	//new CTexture(7, RESOURCE_TEXTURE2D, 0, 7); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+
 	m_nTextureType = nTextureType;
 
 	m_nTextures = nTextures;
@@ -168,8 +170,7 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		if (!bDuplicated)
 		{
 			LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, m_ppstrTextureNames[nIndex], RESOURCE_TEXTURE2D, nIndex);
-		CScene::CreateShaderResourceView(pd3dDevice, this, nIndex);
-		//pShader->CreateShaderResourceView(pd3dDevice, this, nIndex);
+			CScene::CreateShaderResourceView(pd3dDevice, this, nIndex);
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 			m_pnRootParameterIndices[nIndex] = PARAMETER_STANDARD_TEXTURE + nIndex;
 #endif
@@ -924,9 +925,9 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	//pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, PARAMETER_SKYBOX_CUBE_TEXTURE);
+//	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, PARAMETER_SKYBOX_CUBE_TEXTURE);
+
 	CMaterial* pSkyBoxMaterial = new CMaterial();
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture);
 	pSkyBoxMaterial->SetShader(pSkyBoxShader);
@@ -1133,8 +1134,8 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	// 터레인 실습에서는 게임오브젝트를 뷰로 하여 RangeType으로 나누어 또 세세하게 정해줌 ->공부ㅜ필요
 
 	//여기서 우리가 셰이더에 건내줄 상수버퍼뷰를 만든다.
-	//pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, PARAMETER_TERRAIN_TEXTURES);
+
 
 	CMaterial* pTerrainMaterial = new CMaterial();
 	pTerrainMaterial->SetShader(pTerrainShader);
@@ -1264,8 +1265,8 @@ CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	//pBillboardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//pBillboardShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-//	pBillboardShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 16);
 	CScene::CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, PARAMETER_2D_TEXTURE);
+
 	CMaterial* pBillboardMaterial = new CMaterial();
 	pBillboardMaterial->SetTexture(pBillboardTexture);
 	pBillboardMaterial->SetShader(pBillboardShader);
@@ -1346,9 +1347,9 @@ CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pWaterShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pWaterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-//	pWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//pWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
+	//pWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
 	CScene::CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, PARAMETER_WATER_TEXTURES);
+
 
 	CMaterial* pWaterMaterial = new CMaterial();
 	pWaterMaterial->SetTexture(pWaterTexture);
@@ -1406,9 +1407,9 @@ CRippleWater::CRippleWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pRippleWaterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//pRippleWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//pRippleWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 14);
-
 	CScene::CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, PARAMETER_WATER_TEXTURES);
+
+
 	CMaterial* pWaterMaterial = new CMaterial();
 	pWaterMaterial->SetTexture(pWaterTexture);
 	pWaterMaterial->SetShader(pRippleWaterShader);
@@ -1601,8 +1602,8 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CMultiSpriteObjectsShader* pMultiSpriteShader = new CMultiSpriteObjectsShader();
 	pMultiSpriteShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	//pMultiSpriteShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//pMultiSpriteShader->CreateShaderResourceViews(pd3dDevice, pMultiSpriteTexture, 0, 16);
 	CScene::CreateShaderResourceViews(pd3dDevice, pMultiSpriteTexture, 0, PARAMETER_2D_TEXTURE);
+
 	CMaterial* pMultiSpriteMaterial = new CMaterial();
 	pMultiSpriteMaterial->SetTexture(pMultiSpriteTexture);
 	pMultiSpriteMaterial->SetShader(pMultiSpriteShader);

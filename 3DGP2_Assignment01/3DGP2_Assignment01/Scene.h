@@ -74,6 +74,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_d3dSrvGPUDescriptorStartHandle); }
 };
 
+
 class CScene
 {
 public:
@@ -90,7 +91,7 @@ public:
 	void CheckCactusByTankCollisions();
 	void CheckRockByTankCollisions(float fTimeElapsed);
 	void CheckEnemyTankByBulletCollisions();
-	
+
 
 	//void MoveObjectsInCircle(float fTimeElapsed);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -116,44 +117,42 @@ public:
 
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
-//---------------
-	/*int									m_nGameObjects = 0;
-	CGameObject** m_ppGameObjects = NULL;*/
 	//---------------
+		/*int									m_nGameObjects = 0;
+		CGameObject** m_ppGameObjects = NULL;*/
+		//---------------
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 	//---------------
 	CSkyBox* m_pSkyBox = NULL;
-	
-//---------------
+
+	//---------------
 	int m_nDotBillboard = 0;
 	CBillboardObject** m_ppDotBillboard = NULL;
 	int aiming_point_mode = 0;
-//---------------
+	//---------------
 	int m_nSpriteAnimation = 0;
 	CMultiSpriteObject** m_ppSprite = NULL;
-//---------------
+	//---------------
 	CHeightMapTerrain* m_pTerrain = NULL;
-//---------------
+	//---------------
 	LIGHT* m_pLights = NULL;
 	int									m_nLights = 0;
-//---------------
+	//---------------
 
 	float SpriteAnimationElapsedTime = 0.f;
 
-//--------water  animation
+	//--------water  animation
 	CTerrainWater* m_pTerrainWater = NULL;
 	CRippleWater* m_pRipplewater = NULL;
 	XMFLOAT4X4					m_xmf4x4WaterAnimation;
 	ID3D12Resource* m_pd3dcbWaterAnimation = NULL;
 	XMFLOAT4X4* m_pcbMappedWaterAnimation = NULL;
-//---------------
+	//---------------
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
-
-
 
 public:
 	static CDescriptorHeap* m_pDescriptorHeap;
@@ -174,4 +173,5 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorNextHandle() { return(m_pDescriptorHeap->m_d3dCbvGPUDescriptorNextHandle); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorStartHandle() { return(m_pDescriptorHeap->m_d3dSrvCPUDescriptorStartHandle); }
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_pDescriptorHeap->m_d3dSrvGPUDescriptorStartHandle); }
+
 };

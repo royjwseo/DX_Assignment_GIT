@@ -76,7 +76,7 @@ using Microsoft::WRL::ComPtr;
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
 #define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
 
-//#define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
+#define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 
 #define PARAMETER_STANDARD_TEXTURE		3 //카메라 , 월드 , 조명은 같음
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
@@ -90,11 +90,6 @@ using Microsoft::WRL::ComPtr;
 #define PARAMETER_WATER_ANIMATION_MATRIX		15
 #define PARAMETER_SPRITE_ANIMATION_MATRIX		16
 
-
-
-
-
-
 #else
 
 #define PARAMETER_SKYBOX_CUBE_TEXTURE	4
@@ -105,9 +100,6 @@ using Microsoft::WRL::ComPtr;
 #define PARAMETER_TIME_CONSTANTS		8
 #define PARAMETER_WATER_ANIMATION_MATRIX		9
 #define PARAMETER_SPRITE_ANIMATION_MATRIX		10
-
-
-
 
 #endif
 
@@ -131,7 +123,7 @@ extern void WaitForGpuComplete(ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence
 
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType = D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, ID3D12Resource** ppd3dUploadBuffer = NULL);
 extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-extern ID3D12Resource *CreateTextureResourceFromWICFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, wchar_t *pszFileName, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+extern ID3D12Resource* CreateTextureResourceFromWICFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 extern ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
@@ -141,7 +133,7 @@ extern ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, ID3D12G
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
-inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
+inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 
 namespace Vector3
 {
@@ -176,7 +168,7 @@ namespace Vector3
 		return(xmf3Result);
 	}
 
-	
+
 	inline XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool bNormalize = true)
 	{
 		XMFLOAT3 xmf3Result;

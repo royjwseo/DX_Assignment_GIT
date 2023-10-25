@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Shader.h"
+#include "Scene.h"
 
 default_random_engine dre;
 uniform_real_distribution<float> uid(1000.0, 4500.0);
@@ -765,7 +766,7 @@ void CTexturedShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 void CTexturedShader::ReleaseShaderVariables()
 {
-	//if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+	//
 }
 
 void CTexturedShader::ReleaseUploadBuffers()
@@ -851,13 +852,13 @@ CBulletsShader::~CBulletsShader()
 void CBulletsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 
-	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0,4);
-	
+	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4);
+
 	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Missile.bin", this);
 
 	m_ppBullets = new CBulletObject * [BULLETS];
 	for (int i = 0; i < BULLETS; i++) {
-		
+
 
 		//pBulletMesh->Rotate(0.f, 60.f, 0.f);
 		m_ppBullets[i] = new CBulletObject(200);
@@ -934,8 +935,8 @@ void CBulletsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 	for (int i = 0; i < BULLETS; i++) {
 		m_ppBullets[i]->UpdateTransform(NULL);
-		if (m_ppBullets[i]->m_bActive&&!m_ppBullets[i]->Collided) {
-			
+		if (m_ppBullets[i]->m_bActive && !m_ppBullets[i]->Collided) {
+
 			m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
@@ -1096,17 +1097,17 @@ void CBuildingShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_ppBuildingsHeight = new int[m_ntotal_Buildings];
 	for (int i = 0; i < 5; i++) {
 		XMFLOAT3 xmf3RandomPosition{ uid(dre),0,uid(dre) };
-		
+
 		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
 		bool bReverseQuad = ((z % 2) != 0);
 		float fHeight = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
-		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x,xmf3RandomPosition.z,pContext)) {
+		while (!ReturnTerrainHeightDifference(xmf3RandomPosition.x, xmf3RandomPosition.z, pContext)) {
 			xmf3RandomPosition.x = uid(dre);
 			xmf3RandomPosition.z = uid(dre);
 		}
 		m_ppBuildingsHeight[i] = pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad);
-		m_ppBuildings[i] = new CGameObject(0,0);
+		m_ppBuildings[i] = new CGameObject(0, 0);
 		m_ppBuildings[i]->SetChild(pBuilding_threeMesh);
 		pBuilding_threeMesh->AddRef();
 		m_ppBuildings[i]->SetPosition(xmf3RandomPosition.x, m_ppBuildingsHeight[i], xmf3RandomPosition.z);
@@ -1180,7 +1181,7 @@ void CBuildingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	for (int i = 0; i < m_ntotal_Buildings; i++) {
-		
+
 		if (m_ppBuildings[i]) {
 			m_ppBuildings[i]->UpdateTransform(NULL);
 			m_ppBuildings[i]->Render(pd3dCommandList, pCamera);
@@ -1200,7 +1201,7 @@ CWindMillShader::~CWindMillShader()
 
 void CWindMillShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 9);
 	//CGameObject* pBulletMesh= CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/dagger.bin", this);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
@@ -1229,7 +1230,7 @@ void CWindMillShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_ppWindMills[i]->SetChild(pWindMillMesh);
 		pWindMillMesh->AddRef();
 		m_ppWindMills[i]->SetPosition(xmf3RandomPosition.x, m_ppWindMillsHeight[i], xmf3RandomPosition.z);
-		m_ppWindMills[i]->Rotate(0.f, rand()%270, 0.f);
+		m_ppWindMills[i]->Rotate(0.f, rand() % 270, 0.f);
 		(m_ppWindMills[i])->SetOOBB(168.0f, 120.f, 168.0f);
 		m_ppWindMills[i]->PrepareAnimate();
 
@@ -1260,7 +1261,7 @@ void CWindMillShader::AnimateObjects(float fTimeElapsed)
 {
 	for (int i = 0; i < m_nWindMills; i++) {
 		if (m_ppWindMills[i])m_ppWindMills[i]->Animate(fTimeElapsed);
-		
+
 
 	}
 }
@@ -1275,7 +1276,7 @@ void CWindMillShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 			m_ppWindMills[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
-	
+
 }
 
 //----------------------------------------
@@ -1411,25 +1412,25 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	CGameObject* pTankObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/EnemyTank.bin", this);
 
 	for (int i = 0; i < m_nTanks; i++) {
-		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,pContext);
+		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
 		m_ppTankObjects[i]->SetChild(pTankObject);
 		pTankObject->AddRef();
 		m_ppTankObjects[i]->SetOOBB(9.0, 6.0f, 19.0);
 		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-		m_ppTankObjects[i]->SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f+100*i, 260.0f, pTerrain->GetLength() * 0.5f));
-		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f*(i+1));
+		m_ppTankObjects[i]->SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f + 100 * i, 260.0f, pTerrain->GetLength() * 0.5f));
+		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingSpeed(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetRotationSpeed(-0.5f * (i + 1));
 
-	/*	m_pPlayerShader = new CBulletsShader();
-		((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
-		((CBulletsShader*)m_pPlayerShader)->m_pCamera = m_pCamera;
-		m_pPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL);*/
+		/*	m_pPlayerShader = new CBulletsShader();
+			((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
+			((CBulletsShader*)m_pPlayerShader)->m_pCamera = m_pCamera;
+			m_pPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL);*/
 		m_ppTankObjects[i]->PrepareAnimate();
 	}
 
-	
+
 }
 
 void CTankObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -1442,7 +1443,7 @@ void CTankObjectsShader::AnimateObjects(float fTimeElapsed)
 void CTankObjectsShader::ReleaseObjects()
 {
 	for (int i = 0; i < m_nTanks; i++) {
-		if(m_ppTankObjects[i])m_ppTankObjects[i]->Release();
+		if (m_ppTankObjects[i])m_ppTankObjects[i]->Release();
 	}
 	if (m_ppTankObjects)delete[] m_ppTankObjects;
 }
@@ -1452,7 +1453,7 @@ void CTankObjectsShader::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nTanks; i++) {
 		if (m_ppTankObjects[i])m_ppTankObjects[i]->ReleaseUploadBuffers();
 	}
-	
+
 }
 
 void CTankObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -1565,7 +1566,7 @@ void CCactusAndRocksShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	for (int i = 0; i < m_nRock; i++) {
-	
+
 		if (m_ppRocks[i]) {
 			m_ppRocks[i]->UpdateTransform(NULL);
 			m_ppRocks[i]->Render(pd3dCommandList, pCamera);
@@ -1592,9 +1593,9 @@ CTreeShader::~CTreeShader()
 
 void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nMultipleTrees = 5;
+	m_nMultipleTrees = 10;
 	m_ppMultipleTrees = new CGameObject * [m_nMultipleTrees];
-	m_nSingleTrees = 10;
+	m_nSingleTrees = 30;
 	m_ppSingleTrees = new CGameObject * [m_nSingleTrees];
 	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
@@ -1603,7 +1604,7 @@ void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 
 	for (int i = 0; i < m_nMultipleTrees; i++) {
-		m_ppMultipleTrees[i]=new TreesObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppMultipleTrees[i] = new TreesObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppMultipleTrees[i]->SetChild(pMultipleTreeModel);
 		pMultipleTreeModel->AddRef();
 		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
@@ -1612,7 +1613,7 @@ void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			xmf3RandomPosition.z = uid2(dre);
 		}
 		m_ppMultipleTrees[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
-		
+
 	}
 	for (int i = 0; i < m_nSingleTrees; i++) {
 		m_ppSingleTrees[i] = new TreesObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -1626,7 +1627,7 @@ void CTreeShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ppSingleTrees[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z), xmf3RandomPosition.z);
 
 	}
-	
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -1713,11 +1714,11 @@ void CTreeShader::AnimateObjects(float fTimeElapsed)
 {
 	/*for (int j = 0; j < m_nMultipleTrees; j++) {
 		if (m_ppMultipleTrees[j]) m_ppMultipleTrees[j]->Animate(fTimeElapsed);
-		
+
 	}
 	for (int j = 0; j < m_nSingleTrees; j++) {
 		if (m_ppSingleTrees[j]) m_ppSingleTrees[j]->Animate(fTimeElapsed);
-		
+
 	}*/
 }
 

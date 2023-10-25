@@ -72,7 +72,7 @@ public:
 
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
-	
+
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	virtual void Rotate(float x, float y, float z);
 
@@ -90,6 +90,7 @@ public:
 
 	CCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
+	virtual void ReleaseUploadBuffers() {}
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
@@ -185,7 +186,7 @@ public:
 	void ShakeEffect(float fTimeElapsed);
 	//-----------
 	bool Float_in_Water = false;
-	 float FloatEffectTimeElapsed = 0.f;
+	float FloatEffectTimeElapsed = 0.f;
 	float FloatUpDuration = 0.5f;
 	void FloatEffect(float fTimeElapsed);
 	//-------
@@ -197,6 +198,7 @@ public:
 	float m_fdelrot = 1.0;
 	BoundingOrientedBox xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
+	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
