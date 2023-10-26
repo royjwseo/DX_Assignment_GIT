@@ -464,8 +464,16 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 #endif
 		default:
 			break;
+			
 		}
 		break;
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'K':
+			
+			break;
+		}
 	default:
 		break;
 	}

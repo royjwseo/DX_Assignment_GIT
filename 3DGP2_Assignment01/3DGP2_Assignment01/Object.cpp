@@ -1210,6 +1210,7 @@ void CBulletObject::Reset()
 	Collided = false;
 
 	m_bActive = false;
+	
 }
 
 void CBulletObject::Animate(float fElapsedTime, void* pContext)

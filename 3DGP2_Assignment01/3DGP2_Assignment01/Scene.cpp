@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 
+
 CDescriptorHeap* CScene::m_pDescriptorHeap = NULL;
 
 CDescriptorHeap::CDescriptorHeap()
@@ -862,19 +863,30 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_ppDotBillboard[7]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 	}
 
+	if (Game_Sound.Sound_ON) {
+		if (Game_Sound.SoundElapsedTime < 2.5f) {
+			Game_Sound.SoundElapsedTime += fTimeElapsed;
+			Game_Sound.PlayOpeningSound();
+		}
+		else {
+			Game_Sound.PauseOpeningSound();
+			Game_Sound.Sound_ON = false;
+			Game_Sound.SoundElapsedTime = 0.f;
+		}
+	}
 	if (m_ppSprite) {
 		for (int i = 0; i < m_nSpriteAnimation; i++) {
 			if (m_ppSprite[i]->m_bActive) {
 				SpriteAnimationElapsedTime += fTimeElapsed;
 				if (SpriteAnimationElapsedTime < 2.5f) {
 					m_ppSprite[i]->Animate(fTimeElapsed);
+					
 				}
 				else {
 					SpriteAnimationElapsedTime = 0.f;
 					CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
 					for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
 					m_ppSprite[i]->m_bActive = false;
-
 				}
 			}
 		}
@@ -1209,13 +1221,16 @@ void CScene::CheckEnemyTankByBulletCollisions()
 			{
 				//ppBullets[j]->Collided = true;
 				if (!static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet) {
+					//¼Ò¸® on
 					static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet = true; //ÅÊÅ© ¸ÂÀ¸¸é - ÅÊÅ© °ü·Ã Ã³¸®
 					ppBullets[j]->Collided = true; //ÃÑ¾Ë ¸ÂÀ¸¸é - ÃÑ¾Ë °ü·Ã Ã³¸®
 					for (int k = 0; k < m_nSpriteAnimation; k++) {
 						m_ppSprite[k]->m_bActive = true; // ÅÊÅ© ¸ÂÀ¸¸é ½ºÇÁ¶óÀÌÆ® ON
 					}
+
 				}
 				if (static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet) {
+					Game_Sound.Sound_ON = true;
 					XMFLOAT3 xmf3CameraPosition = m_pPlayer->GetCamera()->GetPosition();
 					CPlayer* pPlayer = m_pPlayer;
 					XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();

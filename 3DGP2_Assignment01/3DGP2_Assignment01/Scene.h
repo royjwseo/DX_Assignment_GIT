@@ -6,7 +6,7 @@
 
 #include "Shader.h"
 #include "Player.h"
-
+#include "GameSound.h"
 #define MAX_LIGHTS			16 
 
 #define POINT_LIGHT			1
@@ -153,6 +153,11 @@ public:
 
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
+
+public:
+
+	GameSound Game_Sound;
+	GameSound* GetSound() { return &Game_Sound; }
 
 public:
 	static CDescriptorHeap* m_pDescriptorHeap;
