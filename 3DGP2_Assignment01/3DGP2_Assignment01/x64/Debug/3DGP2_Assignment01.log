@@ -1,31 +1,8 @@
-﻿  3DGP2_Assignment01.cpp
-  Camera.cpp
-  DDSTextureLoader12.cpp
-  GameFramework.cpp
-  Mesh.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Mesh.cpp(834,89): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Mesh.cpp(834,85): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Object.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1530,13): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1534,14): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+﻿  Object.cpp
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1552,13): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Object.cpp(1556,14): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
   Player.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(883,28): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(887,26): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-  Scene.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Scene.cpp(858,74): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Shader.cpp
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(471,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1109,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1113,76): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1131,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1135,76): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1151,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1155,76): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1228,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1232,76): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Shader.cpp(1233,40): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Timer.cpp
-  WICTextureLoader12.cpp
-  stdafx.cpp
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(890,28): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\DX_Assignment_GIT\3DGP2_Assignment01\3DGP2_Assignment01\Player.cpp(894,26): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
   코드를 생성하고 있습니다...
   3DGP2_Assignment01.vcxproj -> C:\Users\서정원\Desktop\3D게임프로그래밍2 과제\x64\Debug\3DGP2_Assignment01.exe

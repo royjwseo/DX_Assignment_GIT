@@ -892,15 +892,14 @@ void CBulletsShader::AnimateObjects(float fTimeElapsed)
 	}
 
 	XMFLOAT3 Axis(0.f, 0.f, 1.f);
-
+	
 	All_nonActive = true;
 	/*if (All_nonActive) {
 		static_cast<CTankPlayer*>(m_pPlayer)->Fired_Bullet = false;
 	}*/
 	for (int i = 0; i < BULLETS; i++)
 	{
-
-
+		
 		if (m_ppBullets[i]->m_bActive) {
 			All_nonActive = false;
 			m_ppBullets[i]->Rotate(&Axis, 360.0f * fTimeElapsed);
@@ -935,6 +934,7 @@ void CBulletsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 	for (int i = 0; i < BULLETS; i++) {
 		m_ppBullets[i]->UpdateTransform(NULL);
+		
 		if (m_ppBullets[i]->m_bActive && !m_ppBullets[i]->Collided) {
 
 			m_ppBullets[i]->Render(pd3dCommandList, pCamera);

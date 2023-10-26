@@ -1182,6 +1182,18 @@ void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 	}
 }
 
+void CBulletObject::UpdateLooktoPoshin()
+{
+	XMFLOAT3 xmf3PoshinUp = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetUp();
+	XMFLOAT3 xmf3PoshinLook = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
+	XMFLOAT3 xmf3PoshinRight = Vector3::CrossProduct(xmf3PoshinUp, xmf3PoshinLook, true);
+	
+	m_xmf4x4Transform._11 = xmf3PoshinRight.x; m_xmf4x4Transform._12 = xmf3PoshinRight.y; m_xmf4x4Transform._13 = xmf3PoshinRight.z;
+	m_xmf4x4Transform._21 = xmf3PoshinUp.x; m_xmf4x4Transform._22 = xmf3PoshinUp.y; m_xmf4x4Transform._23 = xmf3PoshinUp.z;
+	m_xmf4x4Transform._31 = xmf3PoshinLook.x; m_xmf4x4Transform._32 = xmf3PoshinLook.y; m_xmf4x4Transform._33 = xmf3PoshinLook.z;
+
+}
+
 void CBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
 {
 	m_xmf3FirePosition = xmf3FirePosition;
@@ -1209,9 +1221,14 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
+
 	XMFLOAT3 xmf3Position = GetPosition();
+	
+	//XMFLOAT3 xmf3Target = Vector3::ScalarProduct(static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook(), fDistance * 2, false);
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
+	
+	//SetLookAt(static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook());
 	m_fMovingDistance += fDistance;
 	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z) && !Collided) {
 		if (!m_pPlayer->machine_mode)
@@ -1248,6 +1265,9 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4Transform._11 = mtxLookAt._11; m_xmf4x4Transform._12 = mtxLookAt._21; m_xmf4x4Transform._13 = mtxLookAt._31;
 	m_xmf4x4Transform._21 = mtxLookAt._12; m_xmf4x4Transform._22 = mtxLookAt._22; m_xmf4x4Transform._23 = mtxLookAt._32;
 	m_xmf4x4Transform._31 = mtxLookAt._13; m_xmf4x4Transform._32 = mtxLookAt._23; m_xmf4x4Transform._33 = mtxLookAt._33;
+
+
+
 }
 
 CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath, float width, float height) : CGameObject(0, 1)
@@ -1284,9 +1304,10 @@ void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera, float dista
 
 	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 	CPlayer* pPlayer = pCamera->GetPlayer();
-	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+	XMFLOAT3 xmf3PlayerPosition = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetPosition();//static_cast<CBulletsShader*>((static_cast<CTankPlayer*>(pPlayer)->m_pPlayerShader))->m_ppBullets[0]->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetLook();
-	//xmf3PlayerPosition.y += 5.0f;
+	
+	
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, distance, false));
 
 	SetPosition(xmf3Position);
@@ -1295,13 +1316,14 @@ void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera, float dista
 
 void CBillboardObject::SetLookAt(XMFLOAT3& xmf3Target)
 {
+
 	XMFLOAT3 xmf3Up(0.f, 1.f, 0.f);
-	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
 	XMFLOAT3 xmf3Look = Vector3::Subtract(xmf3Target, xmf3Position, true);
 	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
-	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
-	m_xmf4x4World._21 = xmf3Up.x; m_xmf4x4World._22 = xmf3Up.y; m_xmf4x4World._23 = xmf3Up.z;
-	m_xmf4x4World._31 = xmf3Look.x; m_xmf4x4World._32 = xmf3Look.y; m_xmf4x4World._33 = xmf3Look.z;
+	m_xmf4x4Transform._11 = xmf3Right.x; m_xmf4x4Transform._12 = xmf3Right.y; m_xmf4x4Transform._13 = xmf3Right.z;
+	m_xmf4x4Transform._21 = xmf3Up.x; m_xmf4x4Transform._22 = xmf3Up.y; m_xmf4x4Transform._23 = xmf3Up.z;
+	m_xmf4x4Transform._31 = xmf3Look.x; m_xmf4x4Transform._32 = xmf3Look.y; m_xmf4x4Transform._33 = xmf3Look.z;
 
 }
 

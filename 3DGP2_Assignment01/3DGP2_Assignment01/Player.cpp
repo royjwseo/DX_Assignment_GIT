@@ -580,8 +580,8 @@ void CTankPlayer::PrepareAnimate()
 
 void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
-
-	if (m_pPlayerShader) m_pPlayerShader->AnimateObjects(fTimeElapsed);
+	CBulletsShader* pBulletShader = static_cast<CBulletsShader*>(m_pPlayerShader);
+	
 	for (int i = 0; i < m_nWheels; ++i) {
 		if (m_pWheel[i] && (is_RotateWheel || is_Going))
 		{
@@ -612,8 +612,9 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 	if (m_pTurret)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * turret_rotate_value) * fTimeElapsed);
-
+		
 		m_pTurret->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTurret->m_xmf4x4Transform);
+		
 	}
 	if (m_pPoshin)
 	{
@@ -622,6 +623,12 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
 
 		m_pPoshin->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pPoshin->m_xmf4x4Transform);
+		
+	}
+	if (m_pPlayerShader) {
+		m_pPlayerShader->AnimateObjects(fTimeElapsed); 
+	
+	
 	}
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -940,7 +947,6 @@ void CTankPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 }
 
 
-
 void CTankPlayer::FireBullet(CGameObject* pLockedObject)
 {
 
@@ -959,8 +965,9 @@ void CTankPlayer::FireBullet(CGameObject* pLockedObject)
 			pBulletObject = ((CBulletsShader*)m_pPlayerShader)->m_ppBullets[i];
 			break;
 		}
+	
 	}
-
+	
 	XMFLOAT3 PlayerLook = this->m_pPoshin->GetLook();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
 	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
@@ -968,12 +975,16 @@ void CTankPlayer::FireBullet(CGameObject* pLockedObject)
 	if (pBulletObject)
 	{
 
-		XMFLOAT3 xmf3Position = this->m_pPoshin->GetPosition();
+		
 
+		XMFLOAT3 xmf3Position = this->m_pPoshin->GetPosition();
+		XMFLOAT3 xmf3PoshinUp=m_pPoshin->GetUp();
+		                                      
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 30.0f, true));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerLook, 10.0f, true));
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
-		xmf3Direction.y += 0.15f;
+		//xmf3Direction.y += 0.15f;
+		pBulletObject->UpdateLooktoPoshin();
 		pBulletObject->SetMovingDirection(PlayerLook);
 		pBulletObject->SetFirePosition(xmf3FirePosition);
 		//pBulletObject->SetScale(15.5, 15.5, 1.5);
