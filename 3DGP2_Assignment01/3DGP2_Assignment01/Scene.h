@@ -23,6 +23,14 @@ const int MULTI_SPRITE_INDEX = 5;
 
 #define _WITH_RIPPLE_WATER
 
+enum class SceneMode{
+	Start,
+	Played,
+	Playing,
+	End
+
+};
+
 struct LIGHT
 {
 	XMFLOAT4				m_xmf4Ambient;
@@ -112,6 +120,21 @@ public:
 
 	void ReleaseUploadBuffers();
 
+	//-----------
+	//¾À °ü¸®
+	SceneMode scene_Mode;
+	void ChangeSceneMode(SceneMode Mode){
+		scene_Mode = Mode;
+	}
+	void Start_Scene(float fTimeElapsed);
+	
+	SceneMode GetSceneMode() {
+		return scene_Mode;
+	}
+	float StartSceneElapsedTime = 0.f;
+	
+	//------
+
 	CHeightMapTerrain* GetTerrain() { return(m_pTerrain); }
 	CPlayer* m_pPlayer = NULL;
 
@@ -121,10 +144,15 @@ public:
 		/*int									m_nGameObjects = 0;
 		CGameObject** m_ppGameObjects = NULL;*/
 		//---------------
+	//----------
+	
+	//------
+
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 	//---------------
 	CSkyBox* m_pSkyBox = NULL;
+	CSkyBox* m_pStartSkyBox = NULL;
 
 	//---------------
 	int m_nDotBillboard = 0;

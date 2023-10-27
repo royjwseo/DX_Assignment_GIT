@@ -134,6 +134,7 @@ void CScene::CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pTextu
 CScene::CScene()
 {
 	m_xmf4x4WaterAnimation = XMFLOAT4X4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	scene_Mode = SceneMode::Start;
 }
 
 CScene::~CScene()
@@ -202,7 +203,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	BuildDefaultLightsAndMaterials();
 	
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 9 + 3 + 5 + 2 + 4 + 5 + 3 + 5 + 3 + 1 + 60); //총알(4) 건물들3가지(9) 윈드밀(3) 탱크(5), 돌식물(2) 나무(4) 플레이어 (5)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 9 + 3 + 5 + 2 + 4 + 5 + 3 + 5 + 3 + 1 + 150); //총알(4) 건물들3가지(9) 윈드밀(3) 탱크(5), 돌식물(2) 나무(4) 플레이어 (5)
 	//물(3) 지형 (5) 스프라이트 3 스카이박스 1
 
 	m_nDotBillboard = 8;
@@ -222,7 +223,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppSprite[1] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/MyExplosive_02.dds", 8, 8);
 	m_ppSprite[2] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/Explosion_6x6.dds", 6, 6); //크기와 타이밍때문에 제일 뒤에 보임
 
-	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"SkyBox/SunsetSkyBox.dds");
+	m_pStartSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"SkyBox/MountainSkyBox.dds");
 	XMFLOAT3 xmf3Scale(25.0f, 3.0f, 25.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 1.0f, 0.0f);
 #ifdef _WITH_TERRAIN_PARTITION
@@ -305,6 +307,7 @@ void CScene::ReleaseObjects()
 	}
 
 	if (m_pSkyBox) delete m_pSkyBox;
+	if (m_pStartSkyBox) delete m_pStartSkyBox;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pDescriptorHeap) delete m_pDescriptorHeap;
 	if (m_ppDotBillboard) {
@@ -690,6 +693,7 @@ void CScene::ReleaseShaderVariables()
 void CScene::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
+	if (m_pStartSkyBox)m_pStartSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
 	if (m_ppSprite) {
@@ -708,6 +712,24 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pTerrainWater) m_pTerrainWater->ReleaseUploadBuffers();
 	if (m_pRipplewater) m_pRipplewater->ReleaseUploadBuffers();
 }
+
+void CScene::Start_Scene(float fTimeElapsed)
+{
+	StartSceneElapsedTime += fTimeElapsed;
+	XMFLOAT3 PlayerPos = m_pPlayer->GetPosition();
+	CCamera* Camera = m_pPlayer->GetCamera();
+	static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
+	static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
+	if (StartSceneElapsedTime > 3.5f) {
+		static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
+		static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
+		StartSceneElapsedTime = 0.f;
+		ChangeSceneMode(SceneMode::Played);
+	}
+	
+}
+
+
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -816,6 +838,11 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+	if (scene_Mode==SceneMode::Start) {
+		Start_Scene(fTimeElapsed);
+	}
+	
+
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 
@@ -1110,11 +1137,11 @@ void CScene::CheckWindMillByTankCollisions()
 			{
 				if (m_pPlayer->GetPosition().z - 10.f < pShader->m_ppWindMills[i]->GetPosition().z + 41.f && m_pPlayer->GetPosition().z + 10.f > pShader->m_ppWindMills[i]->GetPosition().z - 41.f) {
 					if (m_pPlayer->GetPosition().z > pShader->m_ppWindMills[i]->GetPosition().z) {
-						pos.z = pShader->m_ppWindMills[i]->GetPosition().z + 50.f;
+						pos.z = pShader->m_ppWindMills[i]->GetPosition().z + 48.f;
 						m_pPlayer->SetPosition(pos);
 					}
 					else {
-						pos.z = pShader->m_ppWindMills[i]->GetPosition().z - 50.f;
+						pos.z = pShader->m_ppWindMills[i]->GetPosition().z - 48.f;
 						m_pPlayer->SetPosition(pos);
 					}
 				}
@@ -1123,11 +1150,11 @@ void CScene::CheckWindMillByTankCollisions()
 			{
 				if (m_pPlayer->GetPosition().x - 10.f < pShader->m_ppWindMills[i]->GetPosition().x + 50.f && m_pPlayer->GetPosition().x + 10.f > pShader->m_ppWindMills[i]->GetPosition().x - 50.f) {
 					if (m_pPlayer->GetPosition().x > pShader->m_ppWindMills[i]->GetPosition().x) {
-						pos.x = pShader->m_ppWindMills[i]->GetPosition().x + 50.f;
+						pos.x = pShader->m_ppWindMills[i]->GetPosition().x + 48.f;
 						m_pPlayer->SetPosition(pos);
 					}
 					else {
-						pos.x = pShader->m_ppWindMills[i]->GetPosition().x - 50.f;
+						pos.x = pShader->m_ppWindMills[i]->GetPosition().x - 48.f;
 						m_pPlayer->SetPosition(pos);
 					}
 				}
@@ -1291,41 +1318,46 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbWaterAnimationGpuVirtualAddress = m_pd3dcbWaterAnimation->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(PARAMETER_WATER_ANIMATION_MATRIX, d3dcbWaterAnimationGpuVirtualAddress); //WaterAnimationMatrix
 
-	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-
-	if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
-	if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
-	//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
-	if (m_ppSprite) {
-		for (int i = 0; i < m_nSpriteAnimation; i++) {
-			if (m_ppSprite[i]->m_bActive) {
-				/*auto currentTime = std::chrono::steady_clock::now();
-				auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);*/
-
-
-				m_ppSprite[i]->Render(pd3dCommandList, pCamera);
-			}
-		}
+	if (scene_Mode == SceneMode::Start) {
+		if (m_pStartSkyBox)m_pStartSkyBox->Render(pd3dCommandList, pCamera);
 	}
+	if (scene_Mode != SceneMode::Start) {
+		if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
+		if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-	if (m_ppDotBillboard) {
-		if (aiming_point_mode == 0) {
-			for (int i = 0; i < m_nDotBillboard - 1; i++) {
-				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+		if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
+		if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
+		//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+		for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+		if (m_ppSprite) {
+			for (int i = 0; i < m_nSpriteAnimation; i++) {
+				if (m_ppSprite[i]->m_bActive) {
+					/*auto currentTime = std::chrono::steady_clock::now();
+					auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRenderTime);*/
+
+
+					m_ppSprite[i]->Render(pd3dCommandList, pCamera);
+				}
 			}
 		}
-		else if (aiming_point_mode == 1) {
-			for (int i = 0; i < 5; i++) {
-				m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+
+		if (m_ppDotBillboard) {
+			if (aiming_point_mode == 0) {
+				for (int i = 0; i < m_nDotBillboard - 1; i++) {
+					m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+				}
 			}
-		}
-		else if (aiming_point_mode == 2) {
-			m_ppDotBillboard[7]->Render(pd3dCommandList, pCamera);
-		}
+			else if (aiming_point_mode == 1) {
+				for (int i = 0; i < 5; i++) {
+					m_ppDotBillboard[i]->Render(pd3dCommandList, pCamera);
+				}
+			}
+			else if (aiming_point_mode == 2) {
+				m_ppDotBillboard[7]->Render(pd3dCommandList, pCamera);
+			}
 
 
+		}
 	}
 }
 

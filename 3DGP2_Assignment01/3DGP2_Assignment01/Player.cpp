@@ -503,12 +503,13 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 
 CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext) {
 
-	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
+	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/LEFT_CAMERA, 0.0f);
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	//m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 
 	CGameObject* pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainTank.bin", m_pShader);
+	
 	SetChild(pGameObject);
 	//pGameObject->SetScale(0.5, 0.5, 0.5);
 
@@ -519,6 +520,9 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	SetPlayerUpdatedContext(pTerrain);
 	SetCameraUpdatedContext(pTerrain);
 
+	PrepareAnimate();
+	
+
 	m_pPlayerShader = new CBulletsShader();
 	((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
 	((CBulletsShader*)m_pPlayerShader)->m_pCamera = m_pCamera;
@@ -526,7 +530,6 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
 
 
-	PrepareAnimate();
 
 	/*m_pTrackShader = new CStandardShader();
 	m_pTrackShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -666,9 +669,9 @@ void CTankPlayer::Update(float fTimeElapsed)
 	else if (!bullet_camera_mode) {
 
 		DWORD nCurrentCameraMode = m_pCamera->GetMode();
-		if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+		if (nCurrentCameraMode == THIRD_PERSON_CAMERA|| nCurrentCameraMode == LEFT_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 		if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-		if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
+		if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == LEFT_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 		m_pCamera->RegenerateViewMatrix();
 	}
 
@@ -783,7 +786,7 @@ CCamera* CTankPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) {
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(LEFT_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(1.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, -50.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, -100.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f);
 	default:

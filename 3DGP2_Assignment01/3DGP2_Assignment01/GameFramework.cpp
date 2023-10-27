@@ -258,28 +258,50 @@ void CGameFramework::CreateDirect2DDevice()
 	CoInitialize(NULL);
 	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
 
-	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection);
-
+	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState[0]);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource[0]);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur[0] );
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection,&m_pd2dfxEdgeDetection[0]);
+	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState[1]);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource[1]);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur[1]);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection,&m_pd2dfxEdgeDetection[1]);
 	IWICBitmapDecoder* pwicBitmapDecoder;
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/Digital_Num2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	IWICBitmapFrameDecode* pwicFrameDecode;
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxBitmapSource[0]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
 
-	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
+	m_pd2dfxGaussianBlur[0]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[0]->SetInputEffect(0, m_pd2dfxBitmapSource[0]);
 
-	m_pd2dfxEdgeDetection->SetInputEffect(0, m_pd2dfxBitmapSource);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	m_pd2dfxEdgeDetection[0]->SetInputEffect(0, m_pd2dfxBitmapSource[0]);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/numbers.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder); 
+	pwicBitmapDecoder->GetFrame(1, &pwicFrameDecode);
+	
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[1]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	
+	m_pd2dfxGaussianBlur[1]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[1]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+
+	m_pd2dfxEdgeDetection[1]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
@@ -445,18 +467,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 		case VK_F5:
 		{
-			float fValue = 0;
-			m_pd2dfxGaussianBlur->GetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, &fValue);
-			m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, fValue + 0.f);
-			m_nDrawEffectImage = 0;
+			
 			break;
 		}
 		case VK_F6:
 			m_nDrawEffectImage = 1;
 			break;
 		case VK_F7:
-			m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-			m_nDrawEffectImage = 0;
+			
 			break;
 		case VK_F8:
 			//png_x += 150.f;
@@ -520,10 +538,10 @@ void CGameFramework::OnDestroy()
 	if (m_pdwTextLayout) m_pdwTextLayout->Release();
 	if (m_pd2dbrText) m_pd2dbrText->Release();
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	if (m_pd2dfxBitmapSource) m_pd2dfxBitmapSource->Release();
-	if (m_pd2dfxGaussianBlur) m_pd2dfxGaussianBlur->Release();
-	if (m_pd2dfxEdgeDetection) m_pd2dfxEdgeDetection->Release();
-	if (m_pd2dsbDrawingState) m_pd2dsbDrawingState->Release();
+	if (m_pd2dfxBitmapSource){ m_pd2dfxBitmapSource[0]->Release();	m_pd2dfxBitmapSource[1]->Release();}
+	if (m_pd2dfxGaussianBlur) { m_pd2dfxGaussianBlur[0]->Release();	m_pd2dfxGaussianBlur[1]->Release(); }
+	if (m_pd2dfxEdgeDetection) { m_pd2dfxEdgeDetection[0]->Release(); m_pd2dfxEdgeDetection[1]->Release(); }
+	if (m_pd2dsbDrawingState) { m_pd2dsbDrawingState[0]->Release(); m_pd2dsbDrawingState[1]->Release(); }
 	if (m_pwicFormatConverter) m_pwicFormatConverter->Release();
 	if (m_pwicImagingFactory) m_pwicImagingFactory->Release();
 #endif
@@ -695,6 +713,10 @@ void CGameFramework::AnimateObjects()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+	if (m_pScene->GetSceneMode() == SceneMode::Played) {
+		m_pCamera = m_pPlayer->ChangeCamera((DWORD)(3), m_GameTimer.GetTimeElapsed());
+		m_pScene->ChangeSceneMode(SceneMode::Playing);
+	}
 
 	m_pPlayer->Animate(fTimeElapsed, NULL);
 }
@@ -857,9 +879,15 @@ void CGameFramework::FrameAdvance()
 	D2D_RECT_F d2dRecttens = { tens_x, 100 + tens_y, tens_x + width_png, 100 + tens_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 	D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png, 100 + mins_ones_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 
-	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointones, &d2dRectones);
-	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointtens, &d2dRecttens);
-	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxEdgeDetection, &d2dPointminsones, &d2dRectminsones);
+	m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &d2dPointones, &d2dRectones);
+	m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &d2dPointtens, &d2dRecttens);
+	m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &d2dPointminsones, &d2dRectminsones);
+	
+	//m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	//D2D_POINT_2F d2dPointRecords = { 500, 500.0f };
+	//D2D_RECT_F d2dRectRecords = { 0, 0 , 150,   200 }; // UI 크기
+	//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[1], &d2dPointRecords, &d2dRectRecords);
+
 
 #endif
 
