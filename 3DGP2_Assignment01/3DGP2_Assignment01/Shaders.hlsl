@@ -132,6 +132,9 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	{
 		float3 normalW = input.normalW;
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+		//TBN tangent좌표계에서 모델 좌표계로 변환하는 행렬 이동없으므로 3x3으로 기저를 하나씩 세팅 ,1god ㅌ, 2god ㅛ 3god z
+		// tagent좌표계ㄴ는 x에 tangent y가 bitangent z가 normal이라 각각 순서대로 기저 변환행렬만들어줌.
+
 		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] → [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 		cIllumination = Lighting(input.positionW, normalW);
@@ -381,16 +384,28 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 	output.uv1 = input.uv1;
 	return(output);
 }
+
+
+
+
 Texture2D<float4> gtxtTerrainBaseTexture : register(t14);
 
 Texture2D<float4> gtxtTerrainDetailTexture[3] : register(t15);//t15, t16, t17
 //Texture2D<float> gtxtTerrainAlphaTexture : register(t5);
 Texture2D<float4> gtxtTerrainAlphaTexture : register(t18);
 //Texture2D gtxtTerrainDetail : register(t15);
+Texture2D<float4> gtxtTerrainWaterTexture : register(t19);
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv);
+	float4 cBaseTexColor;
+
+	if (int(gfCurrentTime- 0.4f) % 20 < 10) {
+	cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv);
+	}
+	else {
+		cBaseTexColor = gtxtTerrainDetailTexture[0].Sample(gssWrap, input.uv);
+	}
 	//	float fAlpha = gtxtTerrainAlphaTexture.Sample(gSamplerState, input.uv0);
 		float fAlpha = gtxtTerrainAlphaTexture.Sample(gssWrap, input.uv).w;
 
@@ -413,29 +428,28 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 			else if (fAlpha > 0.8975f) cColor = cDetailTexColors[0];
 			else cColor = cDetailTexColors[1];
 		*/
-		cColor = lerp(cColor, cIllumination, 0.6f);
+	
+
+		if ((170.975f < input.positionW.y) && (input.positionW.y < 179.5f))
+		{
+			cColor.rgb += gtxtTerrainWaterTexture.Sample(gssWrap, float2(input.uv.x * 50.0f, (input.positionW.y - 180.0f) / 3.0f + 0.65f)).rgb * (1.0f - (input.positionW.y - 180.0f) / 5.5f);
+		}
+		else {
+			cColor = lerp(cColor, cIllumination, 0.6f);
+		}
 			return(cColor);
 }
 
-//float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
-//{
-//	
-//	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv);
-//	float4 cDetailTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv1);
-//
-//	float4 cColor = saturate(input.color*0.3f+(cBaseTexColor+cDetailTexColor*0.5f));
-//	//float4 cColor = cBaseTexColor;
-//	return(cColor);
-//}
 
 
 
 
 
-Texture2D<float4> gtxtWaterBaseTexture : register(t19);
-Texture2D<float4> gtxtWaterDetail0Texture : register(t20);
-Texture2D<float4> gtxtWaterDetail1Texture : register(t21);
 
+Texture2D<float4> gtxtWaterBaseTexture : register(t20);
+Texture2D<float4> gtxtWaterDetail0Texture : register(t21);
+Texture2D<float4> gtxtWaterDetail1Texture : register(t22);
+Texture2D<float4> gtxtWaterBaseTexturetwo : register(t23);
 static matrix<float, 3, 3> sf3x3TextureAnimation = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
 
 
@@ -589,8 +603,13 @@ float4 PSRippleWater(VS_RIPPLE_WATER_OUTPUT input) : SV_TARGET
 #endif
 	uv = mul(float3(input.uv0, 1.0f), (float3x3)gf4x4TextureAnimation).xy;
 #endif
-
-	float4 cBaseTexColor = gtxtWaterBaseTexture.SampleLevel(gssWrap, uv, 0);
+	float4 cBaseTexColor;
+	if (int(gfCurrentTime - 0.4f) % 20 <10) {
+		 cBaseTexColor = gtxtWaterBaseTexture.SampleLevel(gssWrap, uv, 0);
+	}else{
+		 cBaseTexColor = gtxtWaterBaseTexturetwo.SampleLevel(gssWrap, uv, 0);
+	}
+	
 	float4 cDetail0TexColor = gtxtWaterDetail0Texture.SampleLevel(gssWrap, uv * 10.0f, 0);
 	float4 cDetail1TexColor = gtxtWaterDetail1Texture.SampleLevel(gssWrap, uv * 5.0f, 0);
 
@@ -629,7 +648,7 @@ VS_SPRITE_OUTPUT VSSpriteAnimation(VS_SPRITE_INPUT input)
 	//output.uv = input.uv;
 	return(output);
 }
-Texture2D gtxtSpriteTexture : register(t22);
+Texture2D gtxtSpriteTexture : register(t24);
 
 float4 PSSpriteAnimation(VS_SPRITE_OUTPUT input) : SV_TARGET
 {

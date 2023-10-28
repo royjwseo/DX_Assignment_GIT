@@ -391,21 +391,21 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dDescriptorRanges[7].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[8].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[8].NumDescriptors = 5;
+	pd3dDescriptorRanges[8].NumDescriptors = 6;
 	pd3dDescriptorRanges[8].BaseShaderRegister = 14; //t14: gtxtTerrainBaseTexture
 	pd3dDescriptorRanges[8].RegisterSpace = 0;
 	pd3dDescriptorRanges[8].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 
 	pd3dDescriptorRanges[9].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[9].NumDescriptors = 3;
-	pd3dDescriptorRanges[9].BaseShaderRegister = 19; //t19: gtxtWaterBaseTexture, t20: gtxtWaterDetailTexture, t21: gtxtWaterDetailAlphaTexture
+	pd3dDescriptorRanges[9].NumDescriptors = 4;
+	pd3dDescriptorRanges[9].BaseShaderRegister = 20; //t20: gtxtWaterBaseTexture, t21: gtxtWaterDetailTexture, t22: gtxtWaterDetailAlphaTexture
 	pd3dDescriptorRanges[9].RegisterSpace = 0;
 	pd3dDescriptorRanges[9].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 22;
+	pd3dDescriptorRanges[10].BaseShaderRegister = 24;
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -932,7 +932,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 
 	m_xmf4x4WaterAnimation._31 += fTimeElapsed * 0.00125f;
-	m_xmf4x4WaterAnimation._32 += fTimeElapsed * 0.00125f;
+	m_xmf4x4WaterAnimation._32 -= fTimeElapsed * 0.00125f;
 
 	CheckBuilding_threeByTankCollisions();
 	CheckBuilding_fiveByTankCollisions();

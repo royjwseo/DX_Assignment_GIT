@@ -711,7 +711,7 @@ void CGameFramework::UpdateShaderVariables()
 void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-
+	
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 	if (m_pScene->GetSceneMode() == SceneMode::Played) {
 		m_pCamera = m_pPlayer->ChangeCamera((DWORD)(3), m_GameTimer.GetTimeElapsed());
