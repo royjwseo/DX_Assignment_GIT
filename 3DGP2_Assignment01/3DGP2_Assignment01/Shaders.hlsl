@@ -271,7 +271,7 @@ float4 PSTree(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cIllumination = Lighting(input.positionW, normalW);
 		cColor = lerp(cColor, cIllumination, 0.5f);
 	}
-
+	
 	return(cColor);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,6 +406,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	else {
 		cBaseTexColor = gtxtTerrainDetailTexture[0].Sample(gssWrap, input.uv);
 	}
+	
 	//	float fAlpha = gtxtTerrainAlphaTexture.Sample(gSamplerState, input.uv0);
 		float fAlpha = gtxtTerrainAlphaTexture.Sample(gssWrap, input.uv).w;
 
@@ -428,11 +429,13 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 			else if (fAlpha > 0.8975f) cColor = cDetailTexColors[0];
 			else cColor = cDetailTexColors[1];
 		*/
-	
+		
 
 		if ((170.975f < input.positionW.y) && (input.positionW.y < 179.5f))
 		{
 			cColor.rgb += gtxtTerrainWaterTexture.Sample(gssWrap, float2(input.uv.x * 50.0f, (input.positionW.y - 180.0f) / 3.0f + 0.65f)).rgb * (1.0f - (input.positionW.y - 180.0f) / 5.5f);
+		}else if (input.positionW.y < 170.8f) {
+			cColor = lerp(cColor, cIllumination, 0.1f);
 		}
 		else {
 			cColor = lerp(cColor, cIllumination, 0.6f);

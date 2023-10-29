@@ -1328,8 +1328,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 		if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-		if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
-		if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
+		
 		//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 		for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 		if (m_ppSprite) {
@@ -1361,6 +1360,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 
 		}
+		
 	}
+}
+
+void CScene::RenderTransparentAfterPlayer(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
+	if (m_pRipplewater) m_pRipplewater->Render(pd3dCommandList, pCamera);
 }
 
