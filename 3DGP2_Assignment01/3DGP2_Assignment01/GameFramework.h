@@ -96,10 +96,11 @@ private:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[2];
-	ID2D1Effect* m_pd2dfxGaussianBlur[2];
-	ID2D1Effect* m_pd2dfxEdgeDetection[2];
-	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[2];
+	int m_nUIinterfaces = 0;
+	ID2D1Effect* m_pd2dfxBitmapSource[4];
+	ID2D1Effect* m_pd2dfxGaussianBlur[4];
+	ID2D1Effect* m_pd2dfxEdgeDetection[4];
+	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[4];
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
 #endif

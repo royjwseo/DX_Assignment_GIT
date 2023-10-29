@@ -25,7 +25,7 @@ const int MULTI_SPRITE_INDEX = 5;
 
 enum class SceneMode{
 	Start,
-	Played,
+	CameraChange,
 	Playing,
 	End
 
@@ -132,6 +132,7 @@ public:
 		return scene_Mode;
 	}
 	float StartSceneElapsedTime = 0.f;
+	bool Start_Game = false;
 	
 	//------
 

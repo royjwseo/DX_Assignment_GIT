@@ -715,16 +715,19 @@ void CScene::ReleaseUploadBuffers()
 
 void CScene::Start_Scene(float fTimeElapsed)
 {
-	StartSceneElapsedTime += fTimeElapsed;
+	
 	XMFLOAT3 PlayerPos = m_pPlayer->GetPosition();
 	CCamera* Camera = m_pPlayer->GetCamera();
 	static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
 	static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
-	if (StartSceneElapsedTime > 3.5f) {
+	if (Start_Game) {
+		StartSceneElapsedTime += fTimeElapsed;
 		static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
 		static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
-		StartSceneElapsedTime = 0.f;
-		ChangeSceneMode(SceneMode::Played);
+		if (StartSceneElapsedTime > 0.5f) {
+			ChangeSceneMode(SceneMode::CameraChange);
+			Start_Game = false;
+		}
 	}
 	
 }
@@ -738,97 +741,100 @@ bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RIGHT:
+	if (scene_Mode == SceneMode::Playing) {
+		switch (nMessageID)
+			{
+			case WM_KEYDOWN:
+				switch (wParam)
+				{
+				case VK_RIGHT:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
-			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
-			if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
-				static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, 1.5f, 0.f);
-			break;
-		case VK_LEFT:
+					static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
+					static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
+					if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
+						static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, 1.5f, 0.f);
+					break;
+				case VK_LEFT:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
-			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
-			if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
-				static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, -1.5f, 0.f);
-			break;
-		case VK_UP:
+					static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = true;
+					static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
+					if (!static_cast<CTankPlayer*>(m_pPlayer)->bullet_camera_mode)
+						static_cast<CTankPlayer*>(m_pPlayer)->Rotate(0.f, -1.5f, 0.f);
+					break;
+				case VK_UP:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
-			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
-			break;
-		case VK_DOWN:
+					static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
+					static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = true;
+					break;
+				case VK_DOWN:
 
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
-			static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
-			break;
-		case 'A':
+					static_cast<CTankPlayer*>(m_pPlayer)->is_Going = true;
+					static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
+					break;
+				case 'A':
 
-			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = -0.15f;
+					static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = -0.15f;
 
-			break;
-		case 'D':
-			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.15f;
-			break;
-		case 'W':
+					break;
+				case 'D':
+					static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.15f;
+					break;
+				case 'W':
 
-			static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = -0.15f;
+					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = -0.15f;
 
-			break;
+					break;
 
-		case 'S':
+				case 'S':
 
-			static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.15f;
+					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.15f;
 
-			break;
-		case 'E':
-			if (static_cast<CBulletsShader*>(static_cast<CTankPlayer*>(m_pPlayer)->m_pPlayerShader)->All_nonActive)
-				static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = true;
-			break;
-		case 'Q':
-			if (static_cast<CBulletsShader*>(static_cast<CTankPlayer*>(m_pPlayer)->m_pPlayerShader)->All_nonActive)
-				static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = false;
-			break;
-		case 'F':
-			aiming_point_mode = (++aiming_point_mode % 4);
-			//for (int i = 0; i < m_nSpriteAnimation; i++)m_ppSprite[i]->SetActive(!m_ppSprite[i]->m_bActive);
-			break;
-		default:
-			break;
-		}
-		break;
-	case  WM_KEYUP:
-		switch (wParam)
-		{
-		case VK_RIGHT:
-		case VK_LEFT:
-			static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = false;
-			break;
-		case VK_UP:
-		case VK_DOWN:
-			static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
-			break;
-		case 'A':
-		case 'D':
-			static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.0f;
-			break;
-		case 'W':
-		case 'S':
+					break;
+				case 'E':
+					if (static_cast<CBulletsShader*>(static_cast<CTankPlayer*>(m_pPlayer)->m_pPlayerShader)->All_nonActive)
+						static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = true;
+					break;
+				case 'Q':
+					if (static_cast<CBulletsShader*>(static_cast<CTankPlayer*>(m_pPlayer)->m_pPlayerShader)->All_nonActive)
+						static_cast<CTankPlayer*>(m_pPlayer)->machine_mode = false;
+					break;
+				case 'F':
+					aiming_point_mode = (++aiming_point_mode % 4);
+					//for (int i = 0; i < m_nSpriteAnimation; i++)m_ppSprite[i]->SetActive(!m_ppSprite[i]->m_bActive);
+					break;
+				default:
+					break;
+				}
+				break;
+			case  WM_KEYUP:
+				switch (wParam)
+				{
+				case VK_RIGHT:
+				case VK_LEFT:
+					static_cast<CTankPlayer*>(m_pPlayer)->is_RotateWheel = false;
+					break;
+				case VK_UP:
+				case VK_DOWN:
+					static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
+					break;
+				case 'A':
+				case 'D':
+					static_cast<CTankPlayer*>(m_pPlayer)->turret_rotate_value = 0.0f;
+					break;
+				case 'W':
+				case 'S':
 
-			static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.f;
+					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.f;
 
-			break;
-		}
-		break;
-	default:
-		break;
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+
+		return(false);
 	}
-	return(false);
 }
 
 bool CScene::ProcessInput(UCHAR* pKeysBuffer)
@@ -842,107 +848,104 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		Start_Scene(fTimeElapsed);
 	}
 	
-
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-
-	//CObjectsShader* pShader = (CObjectsShader*)m_ppShaders[0];
-	CBuildingShader* pBuildingShader = static_cast<CBuildingShader*>(m_ppShaders[BUILDING_INDEX]);
-	CWindMillShader* pWindMillShader = static_cast<CWindMillShader*>(m_ppShaders[WINDMILL_INDEX]);
-	CTankObjectsShader* pEnemyTankShader = static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX]);
-	CCactusAndRocksShader* pCactusAndRocksShader = static_cast<CCactusAndRocksShader*>(m_ppShaders[CACTUS_AND_ROCKS_INDEX]);
-	CTreeShader* pTreeShader = static_cast<CTreeShader*>(m_ppShaders[TREE_INDEX]);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	//for (int i = 0; i < pShader->m_nObjects; i++) {
-	//	
-	//	pShader->m_ppObjects[i]->UpdateBoundingBox();
-	//	
-	//}
-	for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
-		pEnemyTankShader->m_ppTankObjects[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pBuildingShader->m_ntotal_Buildings; i++) {
-		pBuildingShader->m_ppBuildings[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pWindMillShader->m_nWindMills; i++) {
-		pWindMillShader->m_ppWindMills[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pCactusAndRocksShader->m_nCactus; i++) {
-		pCactusAndRocksShader->m_ppCactus[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pCactusAndRocksShader->m_nRock; i++) {
-		pCactusAndRocksShader->m_ppRocks[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pTreeShader->m_nMultipleTrees; i++) {
-		pTreeShader->m_ppMultipleTrees[i]->UpdateBoundingBox();
-	}
-	for (int i = 0; i < pTreeShader->m_nSingleTrees; i++) {
-		pTreeShader->m_ppSingleTrees[i]->UpdateBoundingBox();
-	}
-
-	if (m_ppDotBillboard) {
-
-		for (int i = 0; i < 5; i++) {
-			m_ppDotBillboard[i]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 35 * (i + 1));
+	if (scene_Mode == SceneMode::Playing) {
+		CBuildingShader* pBuildingShader = static_cast<CBuildingShader*>(m_ppShaders[BUILDING_INDEX]);
+		CWindMillShader* pWindMillShader = static_cast<CWindMillShader*>(m_ppShaders[WINDMILL_INDEX]);
+		CTankObjectsShader* pEnemyTankShader = static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX]);
+		CCactusAndRocksShader* pCactusAndRocksShader = static_cast<CCactusAndRocksShader*>(m_ppShaders[CACTUS_AND_ROCKS_INDEX]);
+		CTreeShader* pTreeShader = static_cast<CTreeShader*>(m_ppShaders[TREE_INDEX]);
+		for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+		//for (int i = 0; i < pShader->m_nObjects; i++) {
+		//	
+		//	pShader->m_ppObjects[i]->UpdateBoundingBox();
+		//	
+		//}
+		for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
+			pEnemyTankShader->m_ppTankObjects[i]->UpdateBoundingBox();
 		}
-		m_ppDotBillboard[5]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
-		m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
-		m_ppDotBillboard[7]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
-	}
+		for (int i = 0; i < pBuildingShader->m_ntotal_Buildings; i++) {
+			pBuildingShader->m_ppBuildings[i]->UpdateBoundingBox();
+		}
+		for (int i = 0; i < pWindMillShader->m_nWindMills; i++) {
+			pWindMillShader->m_ppWindMills[i]->UpdateBoundingBox();
+		}
+		for (int i = 0; i < pCactusAndRocksShader->m_nCactus; i++) {
+			pCactusAndRocksShader->m_ppCactus[i]->UpdateBoundingBox();
+		}
+		for (int i = 0; i < pCactusAndRocksShader->m_nRock; i++) {
+			pCactusAndRocksShader->m_ppRocks[i]->UpdateBoundingBox();
+		}
+		for (int i = 0; i < pTreeShader->m_nMultipleTrees; i++) {
+			pTreeShader->m_ppMultipleTrees[i]->UpdateBoundingBox();
+		}
+		for (int i = 0; i < pTreeShader->m_nSingleTrees; i++) {
+			pTreeShader->m_ppSingleTrees[i]->UpdateBoundingBox();
+		}
 
-	if (Game_Sound.Sound_ON) {
-		if (Game_Sound.SoundElapsedTime < 2.5f) {
-			Game_Sound.SoundElapsedTime += fTimeElapsed;
-			Game_Sound.PlayOpeningSound();
+		if (m_ppDotBillboard) {
+
+			for (int i = 0; i < 5; i++) {
+				m_ppDotBillboard[i]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 35 * (i + 1));
+			}
+			m_ppDotBillboard[5]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
+			m_ppDotBillboard[6]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
+			m_ppDotBillboard[7]->Animate(fTimeElapsed, m_pPlayer->GetCamera(), 200.f);
 		}
-		else {
-			Game_Sound.PauseOpeningSound();
-			Game_Sound.Sound_ON = false;
-			Game_Sound.SoundElapsedTime = 0.f;
+
+		if (Game_Sound.Sound_ON) {
+			if (Game_Sound.SoundElapsedTime < 2.5f) {
+				Game_Sound.SoundElapsedTime += fTimeElapsed;
+				Game_Sound.PlayOpeningSound();
+			}
+			else {
+				Game_Sound.PauseOpeningSound();
+				Game_Sound.Sound_ON = false;
+				Game_Sound.SoundElapsedTime = 0.f;
+			}
 		}
-	}
-	if (m_ppSprite) {
-		for (int i = 0; i < m_nSpriteAnimation; i++) {
-			if (m_ppSprite[i]->m_bActive) {
-				SpriteAnimationElapsedTime += fTimeElapsed;
-				if (SpriteAnimationElapsedTime < 2.5f) {
-					m_ppSprite[i]->Animate(fTimeElapsed);
-					
-				}
-				else {
-					SpriteAnimationElapsedTime = 0.f;
-					CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
-					for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
-					m_ppSprite[i]->m_bActive = false;
+		if (m_ppSprite) {
+			for (int i = 0; i < m_nSpriteAnimation; i++) {
+				if (m_ppSprite[i]->m_bActive) {
+					SpriteAnimationElapsedTime += fTimeElapsed;
+					if (SpriteAnimationElapsedTime < 2.5f) {
+						m_ppSprite[i]->Animate(fTimeElapsed);
+
+					}
+					else {
+						SpriteAnimationElapsedTime = 0.f;
+						CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
+						for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
+						m_ppSprite[i]->m_bActive = false;
+					}
 				}
 			}
 		}
+		if (m_pLights)
+		{
+			//m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
+			//m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
+		/*	if (m_pLights[0].m_fRange > 500.0f) {
+				m_pLights[0].m_fRange -= 50.0f * fTimeElapsed;//나중에 마무리될때 ㄲ
+			}*/
+			XMFLOAT3 Tankpos = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetPosition();
+			m_pLights[1].m_xmf3Position = Tankpos;
+			m_pLights[1].m_xmf3Direction = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
+
+		}
+
+		m_xmf4x4WaterAnimation._31 += fTimeElapsed * 0.00125f;
+		m_xmf4x4WaterAnimation._32 -= fTimeElapsed * 0.00125f;
+
+		CheckBuilding_threeByTankCollisions();
+		CheckBuilding_fiveByTankCollisions();
+		CheckWindMillByTankCollisions();
+		CheckBuilding_fourByTankCollisions();
+		CheckCactusByTankCollisions();
+		CheckRockByTankCollisions(fTimeElapsed);
+		CheckEnemyTankByBulletCollisions();
+		//CheckObjectByBulletCollisions();
+	//	MoveObjectsInCircle(fTimeElapsed);
 	}
-	if (m_pLights)
-	{
-		//m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		//m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-	/*	if (m_pLights[0].m_fRange > 500.0f) {
-			m_pLights[0].m_fRange -= 50.0f * fTimeElapsed;//나중에 마무리될때 ㄲ
-		}*/
-		XMFLOAT3 Tankpos = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetPosition();
-		m_pLights[1].m_xmf3Position = Tankpos;
-		m_pLights[1].m_xmf3Direction = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
-
-	}
-
-	m_xmf4x4WaterAnimation._31 += fTimeElapsed * 0.00125f;
-	m_xmf4x4WaterAnimation._32 -= fTimeElapsed * 0.00125f;
-
-	CheckBuilding_threeByTankCollisions();
-	CheckBuilding_fiveByTankCollisions();
-	CheckWindMillByTankCollisions();
-	CheckBuilding_fourByTankCollisions();
-	CheckCactusByTankCollisions();
-	CheckRockByTankCollisions(fTimeElapsed);
-	CheckEnemyTankByBulletCollisions();
-	//CheckObjectByBulletCollisions();
-//	MoveObjectsInCircle(fTimeElapsed);
 }
 
 void CScene::CheckObjectByBulletCollisions() {
