@@ -533,12 +533,14 @@ public:
 	void SetMovingDuration(float Duration) { MoveStrafeDuration = Duration; }
 	void SetMovingSpeed(float mSpeed) { MovingSpeed = mSpeed; }
 	void SetRotationSpeed(float rSpeed) { RotationSpeed = rSpeed; }
+	
 	//탱크 물 위에 뜨기 위한 함수
 	void FloatEffect(float fTimeElapsed);
-	void DieEffect();
+	//void DieEffect();
 
 	void Update(float fTimeElapsed);
 	void UpdateTankPosition();
+	void UpdateTankUpLookRight();
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

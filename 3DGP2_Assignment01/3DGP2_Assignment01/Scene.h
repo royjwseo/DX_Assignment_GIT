@@ -123,6 +123,7 @@ public:
 
 	//-----------
 	//¾À °ü¸®
+	
 	SceneMode scene_Mode;
 	void ChangeSceneMode(SceneMode Mode){
 		scene_Mode = Mode;

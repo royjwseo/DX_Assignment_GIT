@@ -151,7 +151,7 @@ public:
 	//CGameObject* m_pMainMotorFrame = NULL;
 	virtual void Update(float fTimeElapsed)override;
 
-
+	bool MousePressed = false;
 
 	array<CGameObject*, 16> m_pWheel{};
 	int m_nWheels = 16;
@@ -177,7 +177,7 @@ public:
 
 	void OnPlayerUpdateCallback(float fTimeElapsed);
 	void OnCameraUpdateCallback(float fTimeElapsed);
-
+	void UpdatePlayerUp(float fTimeElapsed);
 	void UpdateTankPosition(float fTimeElpased);
 	//---------------------
 	bool Shake = false;

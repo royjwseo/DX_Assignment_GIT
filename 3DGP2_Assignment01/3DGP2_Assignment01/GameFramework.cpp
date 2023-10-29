@@ -673,13 +673,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_SPACE] & 0xF0&&m_pScene->scene_Mode==SceneMode::Start){
 			m_pScene->Start_Game = true;
 		}
-		else
-		{
-			//static_cast<CTankPlayer*>(m_pPlayer)->Fired_Bullet = false;
-			// 스페이스바가 떼진 경우
-			bSpaceKeyPressed = false;
-		}
-
+		
 		 if (pKeysBuffer[VK_SPACE] & 0xF0 && !static_cast<CTankPlayer*>(m_pPlayer)->is_Going && m_pScene->scene_Mode == SceneMode::Playing)
 		{
 			// 스페이스바가 눌린 경우
@@ -726,18 +720,27 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-
+		if ((cxDelta != 0.0f) || (cyDelta != 0.0f)) {
+			static_cast<CTankPlayer*>(m_pPlayer)->MousePressed = true;
+		}
+		else {
+			static_cast<CTankPlayer*>(m_pPlayer)->MousePressed = false;
+		}
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
+			
 			if (cxDelta || cyDelta)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0) 
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
 			if (dwDirection) { m_pPlayer->Move(dwDirection, 100.f * m_GameTimer.GetTimeElapsed(), true); }
 		}
+		
+			
+		
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }

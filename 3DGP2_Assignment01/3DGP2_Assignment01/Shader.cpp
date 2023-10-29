@@ -1415,6 +1415,8 @@ D3D12_BLEND_DESC CRippleWaterShader::CreateBlendState()
 
 	return(d3dBlendDesc);
 }
+
+
 CTankObjectsShader::CTankObjectsShader()
 {
 }

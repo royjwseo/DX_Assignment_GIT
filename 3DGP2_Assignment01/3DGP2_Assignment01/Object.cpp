@@ -1321,7 +1321,7 @@ void CBillboardObject::SetLookAt(XMFLOAT3& xmf3Target)
 {
 
 	XMFLOAT3 xmf3Up(0.f, 1.f, 0.f);
-	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
+	XMFLOAT3 xmf3Position(m_xmf4x4Transform._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
 	XMFLOAT3 xmf3Look = Vector3::Subtract(xmf3Target, xmf3Position, true);
 	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
 	m_xmf4x4Transform._11 = xmf3Right.x; m_xmf4x4Transform._12 = xmf3Right.y; m_xmf4x4Transform._13 = xmf3Right.z;
@@ -1464,6 +1464,7 @@ void CTankObject::Update(float fTimeElapsed)
 	if (m_pTankObjectUpdatedContext) {
 		UpdateTimeElapsed += fTimeElapsed;
 		if (UpdateTimeElapsed < UpdateDuration) {
+			UpdateTankUpLookRight();
 			UpdateTankPosition();
 		}
 		else {
@@ -1474,6 +1475,88 @@ void CTankObject::Update(float fTimeElapsed)
 		FloatEffect(fTimeElapsed);
 
 }
+
+//void CTankObject::UpdateTankObjectUp()
+//{
+//	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
+//	XMFLOAT3 playerPosition = GetPosition();
+//	XMFLOAT3 tankUp = GetUp();
+//	XMFLOAT3 terrainNormal = pTerrain->GetNormal(playerPosition.x, playerPosition.z);
+//
+//	XMFLOAT3 tankUpNormalized, terrainNormalNormalized;
+//	XMVECTOR tankUpVector = XMLoadFloat3(&tankUp);
+//	XMVECTOR terrainNormalVector = XMLoadFloat3(&terrainNormal);
+//	XMStoreFloat3(&tankUpNormalized, XMVector3Normalize(tankUpVector));
+//	XMStoreFloat3(&terrainNormalNormalized, XMVector3Normalize(terrainNormalVector));
+//
+//	float dotProduct = XMVectorGetX(XMVector3Dot(tankUpVector, terrainNormalVector));
+//	float angle = acosf(dotProduct); // 0.008
+//	XMFLOAT3 rotationAxis;
+//	XMStoreFloat3(&rotationAxis, XMVector3Cross(tankUpVector, terrainNormalVector));
+//	XMVECTOR rotationAxisVector = XMLoadFloat3(&rotationAxis);
+//
+//	float targetAngle = 0.0f;
+//	float interpolationFactor = 0.95;
+//
+//	angle = angle * (1.0f - interpolationFactor) + targetAngle * interpolationFactor;
+//
+//	XMMATRIX rotationMatrix = XMMatrixRotationAxis(rotationAxisVector, angle);
+//
+//	XMFLOAT3 tankLook = GetLook();
+//	XMFLOAT3 tankRight = GetRight();
+//
+//	tankLook = Vector3::TransformNormal(tankLook, rotationMatrix);
+//	tankUp = Vector3::TransformNormal(tankUp, rotationMatrix);
+//	tankRight = Vector3::TransformNormal(tankRight, rotationMatrix);
+//
+//	m_xmf4x4Transform._11 = tankRight.x; m_xmf4x4Transform._12 = tankRight.y; m_xmf4x4Transform._13 = tankRight.z;
+//	m_xmf4x4Transform._21 = tankUp.x; m_xmf4x4Transform._22 = tankUp.y; m_xmf4x4Transform._23 = tankUp.z;
+//	m_xmf4x4Transform._31 = tankLook.x; m_xmf4x4Transform._32 = tankLook.y; m_xmf4x4Transform._33 = tankLook.z;
+//
+//
+//}
+
+void CTankObject::UpdateTankUpLookRight()
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
+	XMFLOAT3 TankObjectPosition = GetPosition();
+	XMFLOAT3 TankUp_FLOAT3 = GetUp();
+	XMFLOAT3 TankLook_FLOAT3 = GetLook();
+	XMFLOAT3 TankRight_FLOAT3 = GetRight();
+	XMFLOAT3 TerrainNormal_FLOAT3 = pTerrain->GetNormal(TankObjectPosition.x, TankObjectPosition.z);
+
+	XMFLOAT3 UpdateAxis;
+	XMVECTOR TankUp_VECTOR = XMLoadFloat3(&TankUp_FLOAT3);
+	XMVECTOR TerrainNormal_VECTOR = XMLoadFloat3(&TerrainNormal_FLOAT3);
+
+	XMMATRIX RotationMatrix_WORLD = XMMatrixIdentity();
+
+	float Dot = XMVectorGetX(XMVector3Dot(TankUp_VECTOR, TerrainNormal_VECTOR));
+	float TotalRotationAngle = acosf(Dot);
+	float InterpolationFactor = 0.9f;
+
+	TotalRotationAngle = (1.0f - InterpolationFactor) * TotalRotationAngle;
+
+	if (TotalRotationAngle > 0.0f)
+	{
+		UpdateAxis = Vector3::CrossProduct(TankUp_FLOAT3, TerrainNormal_FLOAT3,true);
+
+		RotationMatrix_WORLD = XMMatrixRotationAxis(XMLoadFloat3(&UpdateAxis), TotalRotationAngle);
+	}
+
+	
+
+	TankLook_FLOAT3 = Vector3::TransformNormal(TankLook_FLOAT3, RotationMatrix_WORLD);
+	TankUp_FLOAT3 = Vector3::TransformNormal(TankUp_FLOAT3, RotationMatrix_WORLD);
+	TankRight_FLOAT3 = Vector3::TransformNormal(TankRight_FLOAT3, RotationMatrix_WORLD);
+
+	m_xmf4x4Transform._11 = TankRight_FLOAT3.x; m_xmf4x4Transform._12 = TankRight_FLOAT3.y; m_xmf4x4Transform._13 = TankRight_FLOAT3.z;
+	m_xmf4x4Transform._21 = TankUp_FLOAT3.x; m_xmf4x4Transform._22 = TankUp_FLOAT3.y; m_xmf4x4Transform._23 = TankUp_FLOAT3.z;
+	m_xmf4x4Transform._31 = TankLook_FLOAT3.x; m_xmf4x4Transform._32 = TankLook_FLOAT3.y; m_xmf4x4Transform._33 = TankLook_FLOAT3.z;
+
+
+}
+
 
 void CTankObject::UpdateTankPosition()
 {

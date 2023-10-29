@@ -166,8 +166,9 @@ void CPlayer::Update(float fTimeElapsed)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	Move(xmf3Velocity, false);
 
-	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
-
+	if (m_pPlayerUpdatedContext) {
+		OnPlayerUpdateCallback(fTimeElapsed);
+	}
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == LEFT_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
@@ -657,7 +658,9 @@ void CTankPlayer::Update(float fTimeElapsed)
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 	if (m_pPlayerUpdatedContext) {
 		UpdateTankPosition(fTimeElapsed);
-
+		/*if (!MousePressed) {
+			UpdatePlayerUp(fTimeElapsed);
+		}*/
 	}
 	if (bullet_camera_mode) {
 		DWORD nCurrentCameraMode = m_pCamera->GetMode();
@@ -775,7 +778,7 @@ CCamera* CTankPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) {
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(1.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, -50.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 25.0f, -60.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f);
 		break;
@@ -947,6 +950,45 @@ void CTankPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 			p3rdPersonCamera->SetLookAt(GetPosition());
 		}
 	}
+}
+
+void CTankPlayer::UpdatePlayerUp(float fTimeElapsed)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
+	XMFLOAT3 PlayerPosition = GetPosition();
+	// 정규화된 up 벡터와 주어진 벡터 사이의 각도를 계산합니다.
+	XMFLOAT3 tankCurrentUp = GetUpVector();
+	XMFLOAT3 tankTerrainNorm = pTerrain->GetNormal(PlayerPosition.x, PlayerPosition.z);
+
+	XMFLOAT3 tankCurrentUpNormalized, tankTerrainNormNormalized;
+	XMVECTOR tankCurrentUpVector = XMLoadFloat3(&tankCurrentUp);
+	XMVECTOR tankTerrainNormVector = XMLoadFloat3(&tankTerrainNorm);
+	XMStoreFloat3(&tankCurrentUpNormalized, XMVector3Normalize(tankCurrentUpVector));
+	XMStoreFloat3(&tankTerrainNormNormalized, XMVector3Normalize(tankTerrainNormVector));
+
+	float dot = XMVectorGetX(XMVector3Dot(tankCurrentUpVector, tankTerrainNormVector));
+	float angle = acosf(dot); // 0.008
+	// 회전축을 계산합니다.
+	XMFLOAT3 rotationAxis;
+	XMStoreFloat3(&rotationAxis, XMVector3Cross(tankCurrentUpVector, tankTerrainNormVector));
+	XMVECTOR rotationAxisVector = XMLoadFloat3(&rotationAxis);
+
+	// 부드러운 보간을 위해 목표 각도를 정의
+	float targetAngle = 0.0f;
+
+	// 보간 계수를 정의합니다. t가 0이면 현재 각도, t가 1이면 목표 각도입니다.
+	float t = 0.95;
+
+	// 현재\ 각도에서 목표 각도까지 부드럽게 보간합니다.
+	angle = angle * (1.0f - t) + targetAngle * t;
+
+	// 회전 행렬을 생성합니다.
+	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(rotationAxisVector, angle);
+
+	// 모든 방향 벡터를 회전 행렬로 변환합니다.
+	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+	m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 }
 
 
