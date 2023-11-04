@@ -1428,9 +1428,9 @@ CTankObjectsShader::~CTankObjectsShader()
 {
 }
 
-void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext,CPlayer* Player)
+void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nTanks = 3;
+	m_nTanks = 5;
 	m_ppTankObjects = new CGameObject * [m_nTanks];
 	
 	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);  //탱크 텍스쳐 5개
@@ -1447,7 +1447,7 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingSpeed(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetRotationSpeed(-0.5f * (i + 1));
-		static_cast<CTankObject*>(m_ppTankObjects[i])->m_pPlayer = Player;
+	
 		m_ppTankObjects[i]->PrepareAnimate();
 	}
 
@@ -1496,11 +1496,14 @@ void CTankObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
+	
 	for (int i = 0; i < m_nTanks; i++) {
 		//m_ppWindMills[i]->Animate(0.16f);
 		if (m_ppTankObjects[i]) {
+	
 			m_ppTankObjects[i]->UpdateTransform(NULL);
 			m_ppTankObjects[i]->Render(pd3dCommandList, pCamera);
+
 		}
 		
 	}

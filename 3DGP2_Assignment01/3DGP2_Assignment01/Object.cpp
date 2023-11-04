@@ -1362,6 +1362,20 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 
 }
 
+void CGameObject::SetLookAt_P(XMFLOAT3& xmf3Target)
+{
+
+	XMFLOAT3 xmf3Up = GetUp();
+	XMFLOAT3 xmf3Position(m_xmf4x4Transform._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
+	XMFLOAT3 xmf3Look = Vector3::Subtract(xmf3Target, xmf3Position, true);
+	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
+	m_xmf4x4Transform._11 = xmf3Right.x; m_xmf4x4Transform._12 = xmf3Right.y; m_xmf4x4Transform._13 = xmf3Right.z;
+	m_xmf4x4Transform._21 = xmf3Up.x; m_xmf4x4Transform._22 = xmf3Up.y; m_xmf4x4Transform._23 = xmf3Up.z;
+	m_xmf4x4Transform._31 = xmf3Look.x; m_xmf4x4Transform._32 = xmf3Look.y; m_xmf4x4Transform._33 = xmf3Look.z;
+
+}
+
+
 CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pfilePath, float width, float height) : CGameObject(0, 1)
 {
 	CTexturedRectMesh* pBillboardMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, width, height, 0.0f, 0.f, 0.f, 0.f);
@@ -1562,7 +1576,7 @@ CTankObject::~CTankObject() {
 void CTankObject::Update(float fTimeElapsed)
 {
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
-	MoveRandom(fTimeElapsed);
+	//MoveRandom(fTimeElapsed);
 
 	RotateWheels(fTimeElapsed);
 	if (m_pTankObjectUpdatedContext) {
@@ -1570,7 +1584,7 @@ void CTankObject::Update(float fTimeElapsed)
 		if (UpdateTimeElapsed < UpdateDuration) {
 			UpdateTankUpLookRight();
 			UpdateTankPosition();
-			//UpdateLookAtPlayer();
+			//m_pTurret->SetLookAt(static_cast<CTankPlayer*>(m_pPlayer)->m_pTurret->GetPosition());
 		}
 		else {
 			UpdateTimeElapsed = 0.0f;
@@ -1629,12 +1643,7 @@ void CTankObject::UpdateTankUpLookRight()
 
 void CTankObject::UpdateLookAtPlayer()
 {
-	/*XMFLOAT3 delta = Vector3::Subtract(GetPosition(), m_pPlayer->GetPosition(),false);
-	float distance = sqrt(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
-
-	if (distance <= 200.f) {
-
-	}*/
+	
 
 	
 }
@@ -1817,11 +1826,12 @@ void CTankObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 }
 void CTankObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-
+	/*CPlayer* pPlayer = pCamera->GetPlayer();
+	XMFLOAT3 PlayerPos = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetPosition();
+	m_pPoshin->SetLookAt(PlayerPos,m_pPoshin->GetUp());*/
 	m_pBullet->UpdateTransform(NULL);
 	if (m_pBullet->m_bActive) {
 		m_pBullet->Render(pd3dCommandList, pCamera);
-
 	}
 	CGameObject::Render(pd3dCommandList, pCamera);
 }

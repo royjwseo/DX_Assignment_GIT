@@ -97,10 +97,10 @@ private:
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
 	int m_nUIinterfaces = 0;
-	ID2D1Effect* m_pd2dfxBitmapSource[4];
-	ID2D1Effect* m_pd2dfxGaussianBlur[4];
-	ID2D1Effect* m_pd2dfxEdgeDetection[4];
-	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[4];
+	ID2D1Effect* m_pd2dfxBitmapSource[6];
+	ID2D1Effect* m_pd2dfxGaussianBlur[6];
+	ID2D1Effect* m_pd2dfxEdgeDetection[6];
+	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[6];
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
 #endif
@@ -108,7 +108,8 @@ private:
 #if defined(_DEBUG)
 	ID3D12Debug* m_pd3dDebugController;
 #endif
-
+	//---------------
+	//시간 UI
 	float elapsedTimeInSeconds = 0.f;
 	float ones_x = 0.0f;
 	float ones_y = 0.f;
@@ -117,11 +118,17 @@ private:
 	float tens_y = 0.f;
 	int tens_cnt{};
 
-	float mins_ones_x = 0.0f;
+	float mins_ones_x = 2700.0f;
 	float mins_ones_y = 0.f;
 	int mins_ones_cnt{};
-
+	//-------------
+	//점수 UI
+	float Score_x = 0.f;
+	float Score_y = 0.f;
+	//------
 	float width_png = 0.f;
+
+	bool Get_Slowed = false;
 
 	CGameTimer					m_GameTimer;
 

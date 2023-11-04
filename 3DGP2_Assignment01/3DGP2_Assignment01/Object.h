@@ -280,7 +280,8 @@ public:
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
 	void SetActive(bool bActive) { m_bActive = bActive; }
-	void SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
+	virtual void SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
+	virtual void SetLookAt_P(XMFLOAT3& xmf3Target);
 	void SetNewUp(XMFLOAT3 newUp);
 
 public:
@@ -530,7 +531,6 @@ public:
 	CGameObject* m_pPoshin = NULL;
 	CTankObjectBullet* m_pBullet = NULL;
 	
-	CPlayer* m_pPlayer = NULL;
 	// Terrain 저장 변수
 	LPVOID						m_pTankObjectUpdatedContext = NULL;
 
@@ -564,7 +564,8 @@ public:
 	void SetMovingDuration(float Duration) { MoveStrafeDuration = Duration; }
 	void SetMovingSpeed(float mSpeed) { MovingSpeed = mSpeed; }
 	void SetRotationSpeed(float rSpeed) { RotationSpeed = rSpeed; }
-	
+
+
 	void LookAtDirection(XMFLOAT3& direction,CGameObject* Object);
 
 	//탱크 물 위에 뜨기 위한 함수
@@ -577,7 +578,7 @@ public:
 	void UpdateTankUpLookRight();
 	void UpdateLookAtPlayer();
 	virtual void PrepareAnimate();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 	virtual void ReleaseUploadBuffers();
 };

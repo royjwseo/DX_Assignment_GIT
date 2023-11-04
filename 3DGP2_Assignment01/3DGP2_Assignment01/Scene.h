@@ -25,8 +25,9 @@ const int MULTI_SPRITE_INDEX = 5;
 
 enum class SceneMode{
 	Start,
-	CameraChange,
+	StartCameraChange,
 	Playing,
+	EndCameraChange,
 	End
 
 };
@@ -136,7 +137,9 @@ public:
 	}
 	float StartSceneElapsedTime = 0.f;
 	bool Start_Game = false;
-	
+	bool End_Game = false;
+	void End_Scene(float fTimeElapsed);
+	float EndSceneElapsedTime = 0.f;
 	//------
 
 	CHeightMapTerrain* GetTerrain() { return(m_pTerrain); }

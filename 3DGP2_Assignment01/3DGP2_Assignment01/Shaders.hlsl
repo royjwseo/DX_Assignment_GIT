@@ -400,7 +400,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
 	float4 cBaseTexColor;
 
-	if (int(gfCurrentTime- 0.4f) % 20 < 10) {
+	if (int(gfCurrentTime) % 20 < 10) {
 	cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv);
 	}
 	else {
@@ -607,7 +607,7 @@ float4 PSRippleWater(VS_RIPPLE_WATER_OUTPUT input) : SV_TARGET
 	uv = mul(float3(input.uv0, 1.0f), (float3x3)gf4x4TextureAnimation).xy;
 #endif
 	float4 cBaseTexColor;
-	if (int(gfCurrentTime - 0.4f) % 20 <10) {
+	if (int(gfCurrentTime) % 20 <10) {
 		 cBaseTexColor = gtxtWaterBaseTexture.SampleLevel(gssWrap, uv, 0);
 	}else{
 		 cBaseTexColor = gtxtWaterBaseTexturetwo.SampleLevel(gssWrap, uv, 0);

@@ -255,7 +255,7 @@ void CGameFramework::CreateDirect2DDevice()
 	}
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	m_nUIinterfaces = 4;
+	m_nUIinterfaces = 6;
 	CoInitialize(NULL);
 	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
 	
@@ -336,6 +336,23 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/TankUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[4]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[4]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[4]->SetInputEffect(0, m_pd2dfxBitmapSource[4]);
+
+	m_pd2dfxEdgeDetection[4]->SetInputEffect(0, m_pd2dfxBitmapSource[4]);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
@@ -726,7 +743,7 @@ void CGameFramework::ProcessInput()
 		else {
 			static_cast<CTankPlayer*>(m_pPlayer)->MousePressed = false;
 		}
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		if (((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))&&m_pScene->GetSceneMode()==SceneMode::Playing)
 		{
 			
 			if (cxDelta || cyDelta)
@@ -736,7 +753,17 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) { m_pPlayer->Move(dwDirection, 100.f * m_GameTimer.GetTimeElapsed(), true); }
+
+			if (dwDirection) {
+				if (Get_Slowed) {
+					m_pPlayer->Move(dwDirection, 100.f * m_GameTimer.GetTimeElapsed(), true);
+				}
+				else {
+					m_pPlayer->Move(dwDirection, 50.f * m_GameTimer.GetTimeElapsed(), true);
+				}
+				
+			
+			}
 		}
 		
 			
@@ -761,9 +788,12 @@ void CGameFramework::AnimateObjects()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 	
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
-	if (m_pScene->GetSceneMode() == SceneMode::CameraChange) {
+	if (m_pScene->GetSceneMode() == SceneMode::StartCameraChange) {
 		m_pCamera = m_pPlayer->ChangeCamera((DWORD)(3), m_GameTimer.GetTimeElapsed());
 		m_pScene->ChangeSceneMode(SceneMode::Playing);
+	}
+	if (m_pScene->GetSceneMode() == SceneMode::EndCameraChange) {
+		m_pCamera = m_pPlayer->ChangeCamera((DWORD)(4), m_GameTimer.GetTimeElapsed());
 	}
 
 	m_pPlayer->Animate(fTimeElapsed, NULL);
@@ -818,7 +848,7 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
+	
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * gnRtvDescriptorIncrementSize);
 
@@ -835,7 +865,12 @@ void CGameFramework::FrameAdvance()
 	UpdateShaderVariables();
 	m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
-
+	if (int(m_GameTimer.GetTotalTime()) % 20 < 10) {
+		Get_Slowed = true;
+	}
+	else {
+		Get_Slowed = false;
+	}
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -872,62 +907,94 @@ void CGameFramework::FrameAdvance()
 
 		if (elapsedTimeInSeconds >= 1.0f) {
 
-			ones_x += 920;
-			ones_cnt++;
+			if (ones_x == 0.f&&ones_y==0.f && tens_x == 0.f&&tens_y==0.f) {
+				if (mins_ones_x > 0.f) {
+					mins_ones_x -= 900.f;
+				}
+				tens_y = 1400.f;
+				ones_x = 3600.f;
+				ones_y = 1400.f;
 
-			if (ones_cnt == 10) {//일의 자리가 9이면 십의 자리 바꿔주기.
+			}
+			else {
 
-				if (tens_cnt == 2) {
-					tens_x += 860;
-				}
-				else {
-					tens_x += 900;
-				}
-				tens_cnt++;
-				if (tens_cnt == 5) {
-					tens_y += 1400.f;
-					tens_x = 0;
-				}
-				if (tens_cnt == 6) {
-					tens_cnt = 0;
-					ones_cnt = 0;
-					ones_x = 0;
-					ones_y = 0;
-					tens_x = 0;
-					tens_y = 0;
-					mins_ones_x += 900.f;
-					mins_ones_cnt++;
-					if (mins_ones_cnt == 5) {
-						mins_ones_y += 1400.f;
-						mins_ones_x = 0;
-					}
-					else if (mins_ones_cnt == 10) {
-						mins_ones_y = 0;
-						mins_ones_x = 0;
-					}
-				}
-
+				ones_x -= 920;
+				ones_cnt++;
 			}
 			if (ones_cnt == 5) {
-				ones_y += 1400.f;
-				ones_x = 0;
+				ones_y -= 1400.f;
+				ones_x = 3600.f;
 			}
 			else if (ones_cnt == 10) {
-				ones_cnt = 0;  //ones_cnt 는 1이면 숫자 2출력
-				ones_x = 0;
-				ones_y = 0;
+				
+				ones_cnt = 0;  
+				ones_x = 3600.f;
+				ones_y = 1400.f;
+				tens_cnt++;
+				if (tens_cnt == 1) {
+					tens_y = 0.f;
+					tens_x = 3600.f;
+				}
+				else {
+					tens_x -= 900.f;
+				}
+				if (tens_cnt == 6) {
+					tens_x = 0;
+					tens_y = 1400.f;
 
+					mins_ones_cnt++;
+					mins_ones_x -= 900.f;
+					if (mins_ones_cnt==1) {
+						//게임종료
+						m_pScene->End_Game = true;
+					}
+					tens_cnt = 0;
+				}
 			}
+			//if (ones_cnt == 10) {//일의 자리가 9이면 십의 자리 바꿔주기.
+
+			//	if (tens_cnt == 2) {
+			//		tens_x += 860;
+			//	}
+			//	else {
+			//		tens_x += 900;
+			//	}
+			//	tens_cnt++;
+			//	if (tens_cnt == 5) {
+			//		tens_y += 1400.f;
+			//		tens_x = 0;
+			//	}
+			//	if (tens_cnt == 6) {
+			//		tens_cnt = 0;
+			//		ones_cnt = 0;
+			//		ones_x = 0;
+			//		ones_y = 0;
+			//		tens_x = 0;
+			//		tens_y = 0;
+			//		mins_ones_x += 900.f;
+			//		mins_ones_cnt++;
+			//		if (mins_ones_cnt == 5) {
+			//			mins_ones_y += 1400.f;
+			//			mins_ones_x = 0;
+			//		}
+			//		else if (mins_ones_cnt == 10) {
+			//			mins_ones_y = 0;
+			//			mins_ones_x = 0;
+			//		}
+			//	}
+
+			//}
+			
 			elapsedTimeInSeconds = 0.f;
 		}
 
 		width_png = 900; //해상도 1280 1024
 		D2D_POINT_2F d2dPointones = { 13540, 0.0f }; //UI 위치 1024 / 0.05(scale) - 20480
-		D2D_POINT_2F d2dPointtens = { 12640, 0.0f };
+		D2D_POINT_2F d2dPointtens = { 12690, 0.0f };
 		D2D_POINT_2F d2dPointminsones = { 11340, 0.0f };
-		D2D_RECT_F d2dRectones = { ones_x, 100 + ones_y, ones_x + width_png, 100 + ones_y + 1400.f }; // UI 크기
-		D2D_RECT_F d2dRecttens = { tens_x, 100 + tens_y, tens_x + width_png, 100 + tens_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
-		D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png, 100 + mins_ones_y + 1400.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+		D2D_RECT_F d2dRectones = { ones_x, 100 + ones_y, ones_x + width_png,  ones_y + 1500.f }; // UI 크기
+		D2D_RECT_F d2dRecttens = { tens_x, 100 + tens_y, tens_x + width_png,  tens_y + 1500.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
+		D2D_RECT_F d2dRectminsones = { mins_ones_x, 100 + mins_ones_y, mins_ones_x + width_png,  mins_ones_y + 1500.f }; //첫 두인자가 사진에서 시작 범위, 다음 두 인자가 범위 끝
 
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &d2dPointones, &d2dRectones);
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &d2dPointtens, &d2dRecttens);
@@ -952,7 +1019,18 @@ void CGameFramework::FrameAdvance()
 	D2D_RECT_F d2dRectTitleUI = { 0, 0 , 1280,   480 }; // UI 크기
 	if (m_pScene->scene_Mode == SceneMode::Start)
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[2], &d2dPointTitleUI, &d2dRectTitleUI);
+	if (m_pScene->scene_Mode == SceneMode::Playing) {
+	
+		D2D_POINT_2F d2dPointScoreUI = { 2300, 0 };
+		D2D_RECT_F d2dRectScoreUI = { 300, 213 , 450,   426 }; // UI 크기
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[3], &d2dPointScoreUI, &d2dRectScoreUI);
 
+		scaleMatrix = D2D1::Matrix3x2F::Scale(0.25f, 0.25f);
+		m_pd2dDeviceContext->SetTransform(scaleMatrix);
+		D2D_POINT_2F d2dTankUI = { 4000, 0 };
+		D2D_RECT_F d2dRectTankUI = { 0, 0 , 512,   512 }; // UI 크기
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[4], &d2dTankUI, &d2dRectTankUI);
+	}
 #endif
 
 	

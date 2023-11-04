@@ -264,7 +264,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CTankObjectsShader* pEnemyTankShader = new CTankObjectsShader();
 	pEnemyTankShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pEnemyTankShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain,m_pPlayer);
+	pEnemyTankShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[ENEMYTANK_INDEX] = pEnemyTankShader;
 
 	CCactusAndRocksShader* pCactusAndRocksShader = new CCactusAndRocksShader();
@@ -725,14 +725,50 @@ void CScene::Start_Scene(float fTimeElapsed)
 		static_cast<CTankPlayer*>(m_pPlayer)->is_Going = false;
 		static_cast<CTankPlayer*>(m_pPlayer)->RotateWheel_Forward = false;
 		if (StartSceneElapsedTime > 0.5f) {
-			ChangeSceneMode(SceneMode::CameraChange);
+			ChangeSceneMode(SceneMode::StartCameraChange);
 			Start_Game = false;
 		}
 	}
 	
 }
 
+void CScene::End_Scene(float fTimeElapsed)
+{
+	if (End_Game) {
+		ChangeSceneMode(SceneMode::EndCameraChange);
+	
+		if (m_pLights) {
+			m_pLights[0].m_bEnable = true;
+			m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+			if (m_pLights[0].m_fRange > 50.f) {
+				
+				if (m_pLights[0].m_fRange > 500.f) {
+					m_pLights[0].m_fRange -= 400.f * fTimeElapsed;
+				}
+				else {
+					m_pLights[0].m_fRange -= 100.f * fTimeElapsed;
+				}
 
+			}
+			else {
+				EndSceneElapsedTime += fTimeElapsed;
+				
+				
+				if (int(EndSceneElapsedTime) % 2 == 1) {
+					m_pLights[0].m_bEnable = false;
+				}
+				else {
+					m_pLights[0].m_bEnable = true;
+				}
+				if (EndSceneElapsedTime > 5.f) {
+					End_Game = false;
+					ChangeSceneMode(SceneMode::End);
+				}
+			}
+		}
+	}
+
+}
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -848,6 +884,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (scene_Mode==SceneMode::Start) {
 		Start_Scene(fTimeElapsed);
+	}
+	if (scene_Mode == SceneMode::Playing||scene_Mode==SceneMode::EndCameraChange) {
+		End_Scene(fTimeElapsed);
 	}
 	
 	if (scene_Mode == SceneMode::Playing) {
@@ -1320,10 +1359,10 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbWaterAnimationGpuVirtualAddress = m_pd3dcbWaterAnimation->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(PARAMETER_WATER_ANIMATION_MATRIX, d3dcbWaterAnimationGpuVirtualAddress); //WaterAnimationMatrix
 
-	if (scene_Mode == SceneMode::Start) {
+	if (scene_Mode == SceneMode::Start||scene_Mode==SceneMode::End) {
 		if (m_pStartSkyBox)m_pStartSkyBox->Render(pd3dCommandList, pCamera);
 	}
-	if (scene_Mode != SceneMode::Start) {
+	if (scene_Mode != SceneMode::Start&&scene_Mode!=SceneMode::End) {
 		if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 		if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 		
