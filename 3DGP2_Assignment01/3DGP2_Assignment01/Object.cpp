@@ -1155,18 +1155,18 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 
 
 
-CBulletObject::CBulletObject(float fEffectiveRange) : CGameObject(0, 0)
+CPlayerBulletObject::CPlayerBulletObject(float fEffectiveRange) : CGameObject(0, 0)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 
 }
 
-CBulletObject::~CBulletObject()
+CPlayerBulletObject::~CPlayerBulletObject()
 {
 
 }
 
-void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+void CPlayerBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{
@@ -1184,7 +1184,7 @@ void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 	}
 }
 
-void CBulletObject::UpdateLooktoPoshin()
+void CPlayerBulletObject::UpdateLooktoPoshin()
 {
 	XMFLOAT3 xmf3PoshinUp = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetUp();
 	XMFLOAT3 xmf3PoshinLook = static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook();
@@ -1196,13 +1196,13 @@ void CBulletObject::UpdateLooktoPoshin()
 
 }
 
-void CBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+void CPlayerBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
 {
 	m_xmf3FirePosition = xmf3FirePosition;
 	SetPosition(xmf3FirePosition);
 }
 
-void CBulletObject::Reset()
+void CPlayerBulletObject::Reset()
 {
 	m_pLockedObject = NULL;
 	m_fElapsedTimeAfterFire = 0;
@@ -1215,7 +1215,7 @@ void CBulletObject::Reset()
 	
 }
 
-void CBulletObject::Animate(float fElapsedTime, void* pContext)
+void CPlayerBulletObject::Animate(float fElapsedTime, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_fElapsedTimeAfterFire += fElapsedTime;
@@ -1251,6 +1251,95 @@ void CBulletObject::Animate(float fElapsedTime, void* pContext)
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime) && !Collided) {
 		if (!m_pPlayer->machine_mode)
 			m_pPlayer->bullet_camera_mode = false; //머신 모드가 아니고 bulletcameramode가 아닐때 쏘면 bulletcameramode로 바뀜.
+		Reset();
+	}
+}
+
+
+
+
+CTankObjectBullet::CTankObjectBullet(float fEffectiveRange) : CGameObject(0, 0)
+{
+	m_fBulletEffectiveRange = fEffectiveRange;
+
+}
+
+CTankObjectBullet::~CTankObjectBullet()
+{
+
+}
+
+void CTankObjectBullet::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+{
+	if (pChild)
+	{
+		pChild->m_pParent = this;
+		if (bReferenceUpdate) pChild->AddRef();
+	}
+	if (m_pChild)
+	{
+		if (pChild) pChild->m_pSibling = m_pChild->m_pSibling;
+		m_pChild->m_pSibling = pChild;
+	}
+	else
+	{
+		m_pChild = pChild;
+	}
+}
+
+void CTankObjectBullet::UpdateLooktoPoshin(XMFLOAT3 TankObjectPoshinUp,XMFLOAT3 TankObjectPoshinLook)
+{
+	XMFLOAT3 xmf3PoshinUp = TankObjectPoshinUp;
+		XMFLOAT3 xmf3PoshinLook = TankObjectPoshinLook;
+	XMFLOAT3 xmf3PoshinRight = Vector3::CrossProduct(xmf3PoshinUp, xmf3PoshinLook, true);
+
+	m_xmf4x4Transform._11 = xmf3PoshinRight.x; m_xmf4x4Transform._12 = xmf3PoshinRight.y; m_xmf4x4Transform._13 = xmf3PoshinRight.z;
+	m_xmf4x4Transform._21 = xmf3PoshinUp.x; m_xmf4x4Transform._22 = xmf3PoshinUp.y; m_xmf4x4Transform._23 = xmf3PoshinUp.z;
+	m_xmf4x4Transform._31 = xmf3PoshinLook.x; m_xmf4x4Transform._32 = xmf3PoshinLook.y; m_xmf4x4Transform._33 = xmf3PoshinLook.z;
+
+}
+
+void CTankObjectBullet::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+{
+	m_xmf3FirePosition = xmf3FirePosition;
+	SetPosition(xmf3FirePosition);
+}
+
+void CTankObjectBullet::Reset()
+{
+	m_pLockedObject = NULL;
+	m_fElapsedTimeAfterFire = 0;
+	m_fMovingDistance = 0;
+	m_fRotationAngle = 0.0f;
+
+	m_bActive = false;
+
+}
+
+void CTankObjectBullet::Animate(float fElapsedTime, void* pContext)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	m_fElapsedTimeAfterFire += fElapsedTime;
+
+	float fDistance = m_fMovingSpeed * fElapsedTime;
+	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
+
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	//XMFLOAT3 xmf3Target = Vector3::ScalarProduct(static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook(), fDistance * 2, false);
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+	SetPosition(xmf3Position);
+
+	//SetLookAt(static_cast<CTankPlayer*>(m_pPlayer)->m_pPoshin->GetLook());
+	m_fMovingDistance += fDistance;
+	if (xmf3Position.y < pTerrain->GetHeight(xmf3Position.x, xmf3Position.z)) {
+		Reset();
+	}
+	UpdateBoundingBox();
+	
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) {
 		Reset();
 	}
 }
@@ -1446,12 +1535,27 @@ CRippleWater::~CRippleWater()
 {
 }
 
-CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext) : CGameObject(0, 0)
+CTankObject::CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, CShader* pShader) : CGameObject(0, 0)
 {
 	SetPlayerUpdatedContext(pContext);
+	
+	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Missile.bin", pShader);
+	
+	m_pBullet = new CTankObjectBullet(200);
+	m_pBullet->SetChild(pBulletMesh, true);
+	pBulletMesh->AddRef();
+	m_pBullet->SetOOBB(6, 6, 16);
+	m_pBullet->SetMovingSpeed(75.0f);
+	m_pBullet->SetActive(false);
+
+
+
 }
 
 CTankObject::~CTankObject() {
+
+	if (m_pBullet)m_pBullet->Release();
+	
 
 }
 
@@ -1466,6 +1570,7 @@ void CTankObject::Update(float fTimeElapsed)
 		if (UpdateTimeElapsed < UpdateDuration) {
 			UpdateTankUpLookRight();
 			UpdateTankPosition();
+			//UpdateLookAtPlayer();
 		}
 		else {
 			UpdateTimeElapsed = 0.0f;
@@ -1476,46 +1581,6 @@ void CTankObject::Update(float fTimeElapsed)
 
 }
 
-//void CTankObject::UpdateTankObjectUp()
-//{
-//	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
-//	XMFLOAT3 playerPosition = GetPosition();
-//	XMFLOAT3 tankUp = GetUp();
-//	XMFLOAT3 terrainNormal = pTerrain->GetNormal(playerPosition.x, playerPosition.z);
-//
-//	XMFLOAT3 tankUpNormalized, terrainNormalNormalized;
-//	XMVECTOR tankUpVector = XMLoadFloat3(&tankUp);
-//	XMVECTOR terrainNormalVector = XMLoadFloat3(&terrainNormal);
-//	XMStoreFloat3(&tankUpNormalized, XMVector3Normalize(tankUpVector));
-//	XMStoreFloat3(&terrainNormalNormalized, XMVector3Normalize(terrainNormalVector));
-//
-//	float dotProduct = XMVectorGetX(XMVector3Dot(tankUpVector, terrainNormalVector));
-//	float angle = acosf(dotProduct); // 0.008
-//	XMFLOAT3 rotationAxis;
-//	XMStoreFloat3(&rotationAxis, XMVector3Cross(tankUpVector, terrainNormalVector));
-//	XMVECTOR rotationAxisVector = XMLoadFloat3(&rotationAxis);
-//
-//	float targetAngle = 0.0f;
-//	float interpolationFactor = 0.95;
-//
-//	angle = angle * (1.0f - interpolationFactor) + targetAngle * interpolationFactor;
-//
-//	XMMATRIX rotationMatrix = XMMatrixRotationAxis(rotationAxisVector, angle);
-//
-//	XMFLOAT3 tankLook = GetLook();
-//	XMFLOAT3 tankRight = GetRight();
-//
-//	tankLook = Vector3::TransformNormal(tankLook, rotationMatrix);
-//	tankUp = Vector3::TransformNormal(tankUp, rotationMatrix);
-//	tankRight = Vector3::TransformNormal(tankRight, rotationMatrix);
-//
-//	m_xmf4x4Transform._11 = tankRight.x; m_xmf4x4Transform._12 = tankRight.y; m_xmf4x4Transform._13 = tankRight.z;
-//	m_xmf4x4Transform._21 = tankUp.x; m_xmf4x4Transform._22 = tankUp.y; m_xmf4x4Transform._23 = tankUp.z;
-//	m_xmf4x4Transform._31 = tankLook.x; m_xmf4x4Transform._32 = tankLook.y; m_xmf4x4Transform._33 = tankLook.z;
-//
-//
-//}
-
 void CTankObject::UpdateTankUpLookRight()
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pTankObjectUpdatedContext;
@@ -1523,8 +1588,13 @@ void CTankObject::UpdateTankUpLookRight()
 	XMFLOAT3 TankUp_FLOAT3 = GetUp();
 	XMFLOAT3 TankLook_FLOAT3 = GetLook();
 	XMFLOAT3 TankRight_FLOAT3 = GetRight();
-	XMFLOAT3 TerrainNormal_FLOAT3 = pTerrain->GetNormal(TankObjectPosition.x, TankObjectPosition.z);
-
+	XMFLOAT3 TerrainNormal_FLOAT3;
+	if (TankObjectPosition.y < 185.f) {
+		TerrainNormal_FLOAT3 = XMFLOAT3(0.f, 1.f, 0.f);
+	}
+	else {
+		TerrainNormal_FLOAT3 = pTerrain->GetNormal(TankObjectPosition.x, TankObjectPosition.z);
+	}
 	XMFLOAT3 UpdateAxis;
 	XMVECTOR TankUp_VECTOR = XMLoadFloat3(&TankUp_FLOAT3);
 	XMVECTOR TerrainNormal_VECTOR = XMLoadFloat3(&TerrainNormal_FLOAT3);
@@ -1557,6 +1627,24 @@ void CTankObject::UpdateTankUpLookRight()
 
 }
 
+void CTankObject::UpdateLookAtPlayer()
+{
+	/*XMFLOAT3 delta = Vector3::Subtract(GetPosition(), m_pPlayer->GetPosition(),false);
+	float distance = sqrt(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+
+	if (distance <= 200.f) {
+
+	}*/
+
+	
+}
+
+void CTankObject::LookAtDirection(XMFLOAT3& direction, CGameObject* Object)
+{
+	
+}
+
+
 
 void CTankObject::UpdateTankPosition()
 {
@@ -1583,6 +1671,8 @@ void CTankObject::UpdateTankPosition()
 
 }
 
+
+
 //std::random_device rd;
 //std::mt19937 mt(rd());
 //std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // -1.0에서 1.0 사이의 랜덤 수 생성
@@ -1596,7 +1686,7 @@ void CTankObject::MoveRandom(float fTimeElapsed)
 	//float fRandZ = dist(mt);
 	MoveStrafeTimeElapsed += fTimeElapsed;
 	if (MoveStrafeTimeElapsed < MoveStrafeDuration) {
-		MoveForward(MovingSpeed * fTimeElapsed);
+		MoveForward(-MovingSpeed * fTimeElapsed);
 	}
 	else if (MoveStrafeTimeElapsed < 1.3 * MoveStrafeDuration)
 	{
@@ -1671,11 +1761,74 @@ void CTankObject::PrepareAnimate() {
 	m_pPoshin = FindFrame("Cube.018");
 }
 
+void CTankObject::FireBullet(CGameObject* pLockedObject)
+{
 
+	/*if (pLockedObject)
+	{
+		SetLookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+		UpdateTransform();
+	}*/
+
+
+	CTankObjectBullet* pBulletObject = NULL;
+	if (!(m_pBullet->m_bActive) && (m_pBullet->m_fMovingDistance == 0))
+	{
+		pBulletObject = m_pBullet;
+
+	}
+
+
+	XMFLOAT3 TankObjectLook = m_pPoshin->GetLook();
+
+
+	if (pBulletObject)
+	{
+
+
+
+		XMFLOAT3 xmf3Position = m_pPoshin->GetPosition();
+		XMFLOAT3 xmf3PoshinUp = m_pPoshin->GetUp();
+
+		XMFLOAT3 xmf3Direction = TankObjectLook;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(TankObjectLook, 10.0f, true));
+
+		//xmf3Direction.y += 0.15f;
+		pBulletObject->UpdateLooktoPoshin(xmf3PoshinUp, TankObjectLook);
+		pBulletObject->SetMovingDirection(TankObjectLook);
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		//pBulletObject->SetScale(15.5, 15.5, 1.5);
+		pBulletObject->SetActive(true);
+		if (pLockedObject)
+		{
+			pBulletObject->m_pLockedObject = pLockedObject;
+
+		}
+	}
+
+
+}
 void CTankObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
 
 	Update(fTimeElapsed);
+	if (m_pBullet->m_bActive)m_pBullet->Animate(fTimeElapsed, m_pTankObjectUpdatedContext);
+
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}
+void CTankObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+
+	m_pBullet->UpdateTransform(NULL);
+	if (m_pBullet->m_bActive) {
+		m_pBullet->Render(pd3dCommandList, pCamera);
+
+	}
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+void CTankObject::ReleaseUploadBuffers()
+{
+	if (m_pBullet)m_pBullet->ReleaseUploadBuffers();
+	CGameObject::ReleaseUploadBuffers();
 }
 //==================================================
 

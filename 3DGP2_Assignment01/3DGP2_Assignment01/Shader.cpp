@@ -827,6 +827,7 @@ D3D12_SHADER_BYTECODE CTerrainShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTerrain", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
+
 void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
@@ -856,12 +857,12 @@ void CBulletsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Missile.bin", this);
 
-	m_ppBullets = new CBulletObject * [BULLETS];
+	m_ppBullets = new CPlayerBulletObject * [BULLETS];
 	for (int i = 0; i < BULLETS; i++) {
 
 
 		//pBulletMesh->Rotate(0.f, 60.f, 0.f);
-		m_ppBullets[i] = new CBulletObject(200);
+		m_ppBullets[i] = new CPlayerBulletObject(200);
 		m_ppBullets[i]->SetChild(pBulletMesh, true);
 		pBulletMesh->AddRef();
 		//pBulletMesh->SetScale(2., 2., 2.);
@@ -951,6 +952,8 @@ D3D12_SHADER_BYTECODE CBulletsShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBullet", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
+
+
 
 CBillboardShader::CBillboardShader()
 {
@@ -1425,17 +1428,17 @@ CTankObjectsShader::~CTankObjectsShader()
 {
 }
 
-void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext,CPlayer* Player)
 {
 	m_nTanks = 3;
 	m_ppTankObjects = new CGameObject * [m_nTanks];
-
+	
 	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);  //탱크 텍스쳐 5개
 
 	CGameObject* pTankObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/EnemyTank.bin", this);
-
+	
 	for (int i = 0; i < m_nTanks; i++) {
-		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
+		m_ppTankObjects[i] = new CTankObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext,this);
 		m_ppTankObjects[i]->SetChild(pTankObject);
 		pTankObject->AddRef();
 		m_ppTankObjects[i]->SetOOBB(9.0, 6.0f, 19.0);
@@ -1444,40 +1447,50 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingSpeed(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetRotationSpeed(-0.5f * (i + 1));
-
-		/*	m_pPlayerShader = new CBulletsShader();
-			((CBulletsShader*)m_pPlayerShader)->m_pPlayer = this;
-			((CBulletsShader*)m_pPlayerShader)->m_pCamera = m_pCamera;
-			m_pPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_pPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL);*/
+		static_cast<CTankObject*>(m_ppTankObjects[i])->m_pPlayer = Player;
 		m_ppTankObjects[i]->PrepareAnimate();
 	}
 
+	
 
 }
 
 void CTankObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	for (int i = 0; i < m_nTanks; i++) {
+		
+			FireBulletTimeElapsed += fTimeElapsed;
+			if (FireBulletTimeElapsed > FireBulletTimeDuration) {
+				if(!static_cast<CTankObject*>(m_ppTankObjects[i])->m_pBullet->m_bActive)
+				static_cast<CTankObject*>(m_ppTankObjects[i])->FireBullet(NULL);
+				FireBulletTimeElapsed = 0.f;
+			}
+		
 		if (m_ppTankObjects[i])m_ppTankObjects[i]->Animate(fTimeElapsed);
-	}
+		}
+	
 }
 
 void CTankObjectsShader::ReleaseObjects()
 {
 	for (int i = 0; i < m_nTanks; i++) {
 		if (m_ppTankObjects[i])m_ppTankObjects[i]->Release();
+
 	}
 	if (m_ppTankObjects)delete[] m_ppTankObjects;
+
 }
 
 void CTankObjectsShader::ReleaseUploadBuffers()
 {
 	for (int i = 0; i < m_nTanks; i++) {
 		if (m_ppTankObjects[i])m_ppTankObjects[i]->ReleaseUploadBuffers();
+		
 	}
 
 }
+
+
 
 void CTankObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
@@ -1489,6 +1502,7 @@ void CTankObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 			m_ppTankObjects[i]->UpdateTransform(NULL);
 			m_ppTankObjects[i]->Render(pd3dCommandList, pCamera);
 		}
+		
 	}
 
 }
@@ -1988,3 +2002,4 @@ void CMultiSpriteObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12Gra
 //	
 //	}
 //}
+

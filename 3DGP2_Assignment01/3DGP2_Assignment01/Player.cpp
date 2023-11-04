@@ -465,7 +465,7 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 	}
 
 
-	CBulletObject* pBulletObject = NULL;
+	CPlayerBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!((CBulletsShader*)m_pPlayerShader)->m_ppBullets[i]->m_bActive && ((CBulletsShader*)m_pPlayerShader)->m_ppBullets[i]->m_fMovingDistance == 0)
@@ -1002,7 +1002,7 @@ void CTankPlayer::FireBullet(CGameObject* pLockedObject)
 	}
 
 
-	CBulletObject* pBulletObject = NULL;
+	CPlayerBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!((CBulletsShader*)m_pPlayerShader)->m_ppBullets[i]->m_bActive && ((CBulletsShader*)m_pPlayerShader)->m_ppBullets[i]->m_fMovingDistance == 0)

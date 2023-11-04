@@ -264,7 +264,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CTankObjectsShader* pEnemyTankShader = new CTankObjectsShader();
 	pEnemyTankShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pEnemyTankShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	pEnemyTankShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain,m_pPlayer);
 	m_ppShaders[ENEMYTANK_INDEX] = pEnemyTankShader;
 
 	CCactusAndRocksShader* pCactusAndRocksShader = new CCactusAndRocksShader();
@@ -784,7 +784,9 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = -0.15f;
 
 					break;
-
+				/*case 'J':
+					static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX])->FireBullet(NULL, 0);
+						break;*/
 				case 'S':
 
 					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.15f;
@@ -855,13 +857,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CCactusAndRocksShader* pCactusAndRocksShader = static_cast<CCactusAndRocksShader*>(m_ppShaders[CACTUS_AND_ROCKS_INDEX]);
 		CTreeShader* pTreeShader = static_cast<CTreeShader*>(m_ppShaders[TREE_INDEX]);
 		for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-		//for (int i = 0; i < pShader->m_nObjects; i++) {
-		//	
-		//	pShader->m_ppObjects[i]->UpdateBoundingBox();
-		//	
-		//}
+	
 		for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
 			pEnemyTankShader->m_ppTankObjects[i]->UpdateBoundingBox();
+			static_cast<CTankObject*>(pEnemyTankShader->m_ppTankObjects[i])->m_pBullet->UpdateBoundingBox();
 		}
 		for (int i = 0; i < pBuildingShader->m_ntotal_Buildings; i++) {
 			pBuildingShader->m_ppBuildings[i]->UpdateBoundingBox();
@@ -1243,7 +1242,7 @@ void CScene::CheckRockByTankCollisions(float fTimeElapsed)
 
 void CScene::CheckEnemyTankByBulletCollisions()
 {
-	CBulletObject** ppBullets = ((CBulletsShader*)((CTankPlayer*)m_pPlayer)->m_pPlayerShader)->m_ppBullets;
+	CPlayerBulletObject** ppBullets = ((CBulletsShader*)((CTankPlayer*)m_pPlayer)->m_pPlayerShader)->m_ppBullets;
 	CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
 	for (int i = 0; i < pEnemyShader->m_nTanks; i++) {
 		for (int j = 0; j < BULLETS; j++) {

@@ -141,7 +141,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cColor = lerp(cColor, cIllumination, 0.5f);
 	}
 
-
+	 
 
 	return(cColor);
 }

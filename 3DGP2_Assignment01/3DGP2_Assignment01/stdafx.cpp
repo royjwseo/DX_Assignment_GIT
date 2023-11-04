@@ -92,7 +92,7 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				::UpdateSubresources<1>(pd3dCommandList, pd3dBuffer, *ppd3dUploadBuffer, 0, 0, 1, &d3dSubResourceData);
 
 #endif
-				::SynchronizeResourceTransition(pd3dCommandList, pd3dBuffer, D3D12_RESOURCE_STATE_COPY_DEST, d3dResourceStates);
+				::SynchronizeResourceTransition(pd3dCommandList, pd3dBuffer, D3D12_RESOURCE_STATE_COPY_DEST, d3dResourceStates); //상태 전이 해준다 COPY_DEST로
 			}
 			break;
 		}
@@ -139,10 +139,10 @@ ID3D12Resource *CreateTextureResourceFromDDSFile(ID3D12Device *pd3dDevice, ID3D1
 
 	D3D12_RESOURCE_DESC d3dResourceDesc;
 	::ZeroMemory(&d3dResourceDesc, sizeof(D3D12_RESOURCE_DESC));
-	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heap에는 텍스쳐를 생성할 수 없음
+	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heap에는 텍스쳐를 생성할 수 없음 . 업로드 힙으로 CPU->GPU메모리로 옮기기 위한 목적이므로 텍스쳐 2D는 직접 GPU에 텍스쳐 데이터 밀어넣으므로 적합하지 않음.
 	d3dResourceDesc.Alignment = 0;
 	d3dResourceDesc.Width = nBytes;
-	d3dResourceDesc.Height = 1;
+	d3dResourceDesc.Height = 1;  //효율적으로 데이터 보내기 위해 연속적인 메모리 구조 1차원형태로 버퍼 만들기
 	d3dResourceDesc.DepthOrArraySize = 1;
 	d3dResourceDesc.MipLevels = 1;
 	d3dResourceDesc.Format = DXGI_FORMAT_UNKNOWN;

@@ -408,11 +408,11 @@ public:
 };
 
 
-class CBulletObject : public CGameObject
+class CPlayerBulletObject : public CGameObject
 {
 public:
-	CBulletObject(float fEffectiveRange);
-	virtual ~CBulletObject();
+	CPlayerBulletObject(float fEffectiveRange);
+	virtual ~CPlayerBulletObject();
 
 public:
 	virtual void Animate(float fElapsedTime, void* pContext);
@@ -433,6 +433,34 @@ public:
 	CGameObject* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
 	CPlayer* m_pPlayer = NULL;
+	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void Reset();
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};
+
+class CTankObjectBullet : public CGameObject
+{
+public:
+	CTankObjectBullet(float fEffectiveRange);
+	virtual ~CTankObjectBullet();
+
+public:
+	virtual void Animate(float fElapsedTime, void* pContext);
+	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	float						m_fBulletEffectiveRange = 400.0f;
+	float						m_fMovingDistance = 0.0f;
+	float						m_fRotationAngle = 0.0f;
+	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	void UpdateLooktoPoshin(XMFLOAT3 TankObjectPoshinUp, XMFLOAT3 TankObjectPoshinLook);
+	LPVOID m_pContextforAnimation = NULL;
+
+	
+
+	float						m_fElapsedTimeAfterFire = 0.0f;
+	float						m_fLockingDelayTime = 0.3f;
+	float						m_fLockingTime = 5.0f;
+	CGameObject* m_pLockedObject = NULL;
+
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
@@ -492,15 +520,17 @@ public:
 class CTankObject : public CGameObject
 {
 public:
-	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
+	CTankObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, CShader* pShader);
 	virtual ~CTankObject();
 
-private:
+public:
 	int m_nWheels = 16;
 	array<CGameObject*, 16> m_pWheel{};
 	CGameObject* m_pTurret = NULL;
 	CGameObject* m_pPoshin = NULL;
-
+	CTankObjectBullet* m_pBullet = NULL;
+	
+	CPlayer* m_pPlayer = NULL;
 	// Terrain 저장 변수
 	LPVOID						m_pTankObjectUpdatedContext = NULL;
 
@@ -513,6 +543,7 @@ private:
 
 	float UpdateTimeElapsed = 0.f;
 	float UpdateDuration = 0.5f;
+
 
 	// 물 위에 뜨기 위한 변수들
 	bool Float_in_Water = false;
@@ -534,15 +565,21 @@ public:
 	void SetMovingSpeed(float mSpeed) { MovingSpeed = mSpeed; }
 	void SetRotationSpeed(float rSpeed) { RotationSpeed = rSpeed; }
 	
+	void LookAtDirection(XMFLOAT3& direction,CGameObject* Object);
+
 	//탱크 물 위에 뜨기 위한 함수
 	void FloatEffect(float fTimeElapsed);
 	//void DieEffect();
+	void FireBullet(CGameObject* pLockedObject);
 
 	void Update(float fTimeElapsed);
 	void UpdateTankPosition();
 	void UpdateTankUpLookRight();
+	void UpdateLookAtPlayer();
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void ReleaseUploadBuffers();
 };
 
 class CMultiSpriteObject : public CGameObject

@@ -105,7 +105,7 @@ public:
 
 	float						m_fBulletEffectiveRange = 800.0f;
 
-	CBulletObject* pBulletObject = NULL;
+	CPlayerBulletObject* pBulletObject = NULL;
 	CGameObject* m_pMainMotorFrame = NULL;
 	CGameObject* m_pLowMotorFrame = NULL;
 	CGameObject* m_pSubEngine1MotorFrame = NULL;
@@ -145,9 +145,9 @@ private:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 public:
-	float						m_fBulletEffectiveRange = 800.0f;
+	/*float						m_fBulletEffectiveRange = 800.0f;
 
-	CBulletObject* pBulletObject = NULL;
+	CBulletObject* pBulletObject = NULL;*/
 	//CGameObject* m_pMainMotorFrame = NULL;
 	virtual void Update(float fTimeElapsed)override;
 
