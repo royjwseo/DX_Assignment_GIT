@@ -1592,6 +1592,13 @@ void CTankObject::Update(float fTimeElapsed)
 	}
 	if (Float_in_Water)
 		FloatEffect(fTimeElapsed);
+	if (hitByBullet) {
+		dieAnimationElapsedTime += fTimeElapsed;
+		DieAnimation(fTimeElapsed);
+		if(dieAnimationElapsedTime>2.5f){
+			die = true;
+		}
+	}
 
 }
 
@@ -1747,7 +1754,27 @@ void CTankObject::FloatEffect(float fTimeElapsed)
 	}
 
 }
+void CTankObject::DieAnimation(float fTimeElapsed) {
+	// 셰이킹 속도와 범위를 정의합니다.
+	float shakeSpeed = 10.0f; // 예시로 10.0f로 설정
+	float shakeRange = 0.3f; // 예시로 0.1f로 설정
 
+	// 경과 시간에 따라 셰이킹합니다.
+	static float direction = 1.0f;
+	static float elapsedTime = 0.0f;
+
+	elapsedTime += fTimeElapsed;
+
+	if (elapsedTime >= 0.1f) // 셰이킹 간격 설정 (예시로 0.1초로 설정)
+	{
+		direction *= -1.0f; // 방향을 반대로 변경
+		elapsedTime = 0.0f;
+	}
+
+	float shakeAmount = direction * shakeRange * sin(shakeSpeed * elapsedTime);
+
+	MoveStrafe(shakeAmount);
+}
 
 void CTankObject::PrepareAnimate() {
 	m_pWheel[0] = FindFrame("Cube.000");
@@ -1817,23 +1844,28 @@ void CTankObject::FireBullet(CGameObject* pLockedObject)
 
 
 }
+
+
 void CTankObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent) {
+	if (!die) {
+		Update(fTimeElapsed);
+		if (m_pBullet->m_bActive)m_pBullet->Animate(fTimeElapsed, m_pTankObjectUpdatedContext);
 
-	Update(fTimeElapsed);
-	if (m_pBullet->m_bActive)m_pBullet->Animate(fTimeElapsed, m_pTankObjectUpdatedContext);
-
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+		CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	}
 }
 void CTankObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	/*CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 PlayerPos = static_cast<CTankPlayer*>(pPlayer)->m_pPoshin->GetPosition();
 	m_pPoshin->SetLookAt(PlayerPos,m_pPoshin->GetUp());*/
-	m_pBullet->UpdateTransform(NULL);
-	if (m_pBullet->m_bActive) {
-		m_pBullet->Render(pd3dCommandList, pCamera);
+	if (!die) {
+		m_pBullet->UpdateTransform(NULL);
+		if (m_pBullet->m_bActive) {
+			m_pBullet->Render(pd3dCommandList, pCamera);
+		}
+		CGameObject::Render(pd3dCommandList, pCamera);
 	}
-	CGameObject::Render(pd3dCommandList, pCamera);
 }
 void CTankObject::ReleaseUploadBuffers()
 {

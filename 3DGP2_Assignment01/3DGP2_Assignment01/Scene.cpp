@@ -880,6 +880,53 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 	return(false);
 }
 
+void CScene::Lose_Animation(float fTimeElapsed) {
+
+	CTankPlayer* pPlayer = static_cast<CTankPlayer*>(m_pPlayer);
+	XMFLOAT3 pos = pPlayer->GetPosition();
+
+	pPlayer->is_Going = true;
+	pPlayer->is_RotateWheel = true;
+
+	for (int i = 0; i < m_nSpriteAnimation; i++) {
+		m_ppSprite[i]->m_bActive = true;
+		m_ppSprite[i]->SetPosition(pos);
+		m_ppSprite[i]->SetLookAt(pPlayer->GetCamera()->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+		m_ppSprite[i]->Animate(fTimeElapsed);
+	}
+
+}
+
+void CScene::Win_Animation(float fTimeElapsed) {
+	WinElapsedTime += fTimeElapsed;
+	CTankPlayer* pPlayer = static_cast<CTankPlayer*>(m_pPlayer);
+
+	WinElapsedTime += fTimeElapsed;
+	pPlayer->is_Going = true;
+	pPlayer->is_RotateWheel = true;
+	pPlayer->m_pPoshin->Rotate(0, 0, -120.f * fTimeElapsed);
+	pPlayer->m_pPoshin->Rotate(20.f * fTimeElapsed, 0, 0);
+	pPlayer->m_pTurret->Rotate(0, 120.f * fTimeElapsed, 0.f);
+	if (WinElapsedTime < WinRotationDuration) {
+		pPlayer->Rotate(120.f * fTimeElapsed, 0, 120.f * fTimeElapsed);
+
+	}
+	else if (WinElapsedTime < 3 * WinRotationDuration)
+	{
+		// 두 번째 회전
+		pPlayer->Rotate(0.0f, -120.f * fTimeElapsed, -120.f * fTimeElapsed);
+	}
+	else
+	{
+		// 세 번째 회전
+		pPlayer->Rotate(0.0f, 120.f * fTimeElapsed, 120.f * fTimeElapsed);
+	}
+	if (WinElapsedTime >= 4 * WinRotationDuration)
+	{
+		WinElapsedTime = 0.0f;
+	}
+
+}
 void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (scene_Mode==SceneMode::Start) {
@@ -888,7 +935,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (scene_Mode == SceneMode::Playing||scene_Mode==SceneMode::EndCameraChange) {
 		End_Scene(fTimeElapsed);
 	}
-	
+	if (scene_Mode == SceneMode::End && Lose == true) {
+		Lose_Animation(fTimeElapsed);
+	}
+	if (scene_Mode == SceneMode::End && Win == true) {
+		Lose_Animation(fTimeElapsed);
+	}
 	if (scene_Mode == SceneMode::Playing) {
 		CBuildingShader* pBuildingShader = static_cast<CBuildingShader*>(m_ppShaders[BUILDING_INDEX]);
 		CWindMillShader* pWindMillShader = static_cast<CWindMillShader*>(m_ppShaders[WINDMILL_INDEX]);
@@ -952,7 +1004,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 					else {
 						SpriteAnimationElapsedTime = 0.f;
 						CTankObjectsShader* pEnemyShader = (CTankObjectsShader*)m_ppShaders[ENEMYTANK_INDEX];
-						for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
+						//for (int j = 0; j < pEnemyShader->m_nTanks; j++) static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[j])->hitByBullet = false;
 						m_ppSprite[i]->m_bActive = false;
 					}
 				}
@@ -983,6 +1035,16 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CheckEnemyTankByBulletCollisions();
 		//CheckObjectByBulletCollisions();
 	//	MoveObjectsInCircle(fTimeElapsed);
+		int cnt = 0;
+		for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
+			if (static_cast<CTankObject*>(pEnemyTankShader->m_ppTankObjects[i])->die) {
+				cnt++;
+			}
+		}
+		if (cnt != n_deadTank) {
+			n_deadTank = cnt;
+		}
+		//죽은 탱크 개수를 토대로 UI바꾸기.
 	}
 }
 
@@ -1287,6 +1349,7 @@ void CScene::CheckEnemyTankByBulletCollisions()
 		for (int j = 0; j < BULLETS; j++) {
 			if (ppBullets[j]->m_bActive && pEnemyShader->m_ppTankObjects[i]->m_xmCollision.Intersects(ppBullets[j]->m_xmCollision))
 			{
+				
 				//ppBullets[j]->Collided = true;
 				if (!static_cast<CTankObject*>(pEnemyShader->m_ppTankObjects[i])->hitByBullet) {
 					//소리 on
@@ -1313,7 +1376,7 @@ void CScene::CheckEnemyTankByBulletCollisions()
 						m_ppSprite[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 					}
 				}
-
+				
 			}
 		}
 	}
@@ -1359,8 +1422,17 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbWaterAnimationGpuVirtualAddress = m_pd3dcbWaterAnimation->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(PARAMETER_WATER_ANIMATION_MATRIX, d3dcbWaterAnimationGpuVirtualAddress); //WaterAnimationMatrix
 
-	if (scene_Mode == SceneMode::Start||scene_Mode==SceneMode::End) {
+	if (scene_Mode == SceneMode::Start) {
 		if (m_pStartSkyBox)m_pStartSkyBox->Render(pd3dCommandList, pCamera);
+	}
+	if (scene_Mode == SceneMode::End && Lose) {
+		if (m_ppSprite) {
+			for (int i = 0; i < m_nSpriteAnimation; i++) {
+				if (m_ppSprite[i]->m_bActive) {
+					m_ppSprite[i]->Render(pd3dCommandList, pCamera);
+				}
+			}
+		}
 	}
 	if (scene_Mode != SceneMode::Start&&scene_Mode!=SceneMode::End) {
 		if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);

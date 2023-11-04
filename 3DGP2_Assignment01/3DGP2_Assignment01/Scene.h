@@ -152,9 +152,16 @@ public:
 		CGameObject** m_ppGameObjects = NULL;*/
 		//---------------
 	//----------
-	
+	bool Win = false;
+	bool Lose = false;
+	float WinElapsedTime = 0.f;
+	float WinRotationDuration = 0.6f;
+	void Lose_Animation(float fTimeElapsed);
+	void Win_Animation(float fTimeElapsed);
 	//------
-
+	//ÅÊÅ© Á×Àº °³¼ö °ü¸®
+	int n_deadTank = 0;
+	//
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 	//---------------

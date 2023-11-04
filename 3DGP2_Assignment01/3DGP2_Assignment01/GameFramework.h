@@ -97,10 +97,10 @@ private:
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
 	int m_nUIinterfaces = 0;
-	ID2D1Effect* m_pd2dfxBitmapSource[6];
-	ID2D1Effect* m_pd2dfxGaussianBlur[6];
-	ID2D1Effect* m_pd2dfxEdgeDetection[6];
-	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[6];
+	ID2D1Effect* m_pd2dfxBitmapSource[9];
+	ID2D1Effect* m_pd2dfxGaussianBlur[9];
+	ID2D1Effect* m_pd2dfxEdgeDetection[9];
+	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[9];
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
 #endif
@@ -123,8 +123,8 @@ private:
 	int mins_ones_cnt{};
 	//-------------
 	//Á¡¼ö UI
-	float Score_x = 0.f;
-	float Score_y = 0.f;
+	float Score_x = 300.f;
+	float Score_y = 213.f;
 	//------
 	float width_png = 0.f;
 

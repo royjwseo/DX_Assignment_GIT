@@ -1430,7 +1430,7 @@ CTankObjectsShader::~CTankObjectsShader()
 
 void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nTanks = 5;
+	m_nTanks = 7;
 	m_ppTankObjects = new CGameObject * [m_nTanks];
 	
 	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);  //탱크 텍스쳐 5개

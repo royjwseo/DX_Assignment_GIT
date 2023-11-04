@@ -177,7 +177,7 @@ public:
 
 	void OnPlayerUpdateCallback(float fTimeElapsed);
 	void OnCameraUpdateCallback(float fTimeElapsed);
-	void UpdatePlayerUp(float fTimeElapsed);
+	
 	void UpdateTankPosition(float fTimeElpased);
 	//---------------------
 	bool Shake = false;

@@ -552,6 +552,7 @@ public:
 
 public:
 	bool die = false;
+	float dieAnimationElapsedTime = 0.f;
 	bool hitByBullet = false;
 
 public:
@@ -568,6 +569,7 @@ public:
 
 	void LookAtDirection(XMFLOAT3& direction,CGameObject* Object);
 
+	void DieAnimation(float fTimeElapsed);
 	//탱크 물 위에 뜨기 위한 함수
 	void FloatEffect(float fTimeElapsed);
 	//void DieEffect();

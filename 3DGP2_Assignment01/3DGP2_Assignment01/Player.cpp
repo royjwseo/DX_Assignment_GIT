@@ -952,44 +952,6 @@ void CTankPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	}
 }
 
-void CTankPlayer::UpdatePlayerUp(float fTimeElapsed)
-{
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
-	XMFLOAT3 PlayerPosition = GetPosition();
-	// 정규화된 up 벡터와 주어진 벡터 사이의 각도를 계산합니다.
-	XMFLOAT3 tankCurrentUp = GetUpVector();
-	XMFLOAT3 tankTerrainNorm = pTerrain->GetNormal(PlayerPosition.x, PlayerPosition.z);
-
-	XMFLOAT3 tankCurrentUpNormalized, tankTerrainNormNormalized;
-	XMVECTOR tankCurrentUpVector = XMLoadFloat3(&tankCurrentUp);
-	XMVECTOR tankTerrainNormVector = XMLoadFloat3(&tankTerrainNorm);
-	XMStoreFloat3(&tankCurrentUpNormalized, XMVector3Normalize(tankCurrentUpVector));
-	XMStoreFloat3(&tankTerrainNormNormalized, XMVector3Normalize(tankTerrainNormVector));
-
-	float dot = XMVectorGetX(XMVector3Dot(tankCurrentUpVector, tankTerrainNormVector));
-	float angle = acosf(dot); // 0.008
-	// 회전축을 계산합니다.
-	XMFLOAT3 rotationAxis;
-	XMStoreFloat3(&rotationAxis, XMVector3Cross(tankCurrentUpVector, tankTerrainNormVector));
-	XMVECTOR rotationAxisVector = XMLoadFloat3(&rotationAxis);
-
-	// 부드러운 보간을 위해 목표 각도를 정의
-	float targetAngle = 0.0f;
-
-	// 보간 계수를 정의합니다. t가 0이면 현재 각도, t가 1이면 목표 각도입니다.
-	float t = 0.95;
-
-	// 현재\ 각도에서 목표 각도까지 부드럽게 보간합니다.
-	angle = angle * (1.0f - t) + targetAngle * t;
-
-	// 회전 행렬을 생성합니다.
-	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(rotationAxisVector, angle);
-
-	// 모든 방향 벡터를 회전 행렬로 변환합니다.
-	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-	m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-}
 
 
 void CTankPlayer::FireBullet(CGameObject* pLockedObject)
