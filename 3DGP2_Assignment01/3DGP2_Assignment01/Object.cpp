@@ -1576,7 +1576,7 @@ CTankObject::~CTankObject() {
 void CTankObject::Update(float fTimeElapsed)
 {
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
-	//MoveRandom(fTimeElapsed);
+	MoveRandom(fTimeElapsed);
 
 	RotateWheels(fTimeElapsed);
 	if (m_pTankObjectUpdatedContext) {
@@ -1702,7 +1702,8 @@ void CTankObject::MoveRandom(float fTimeElapsed)
 	//float fRandZ = dist(mt);
 	MoveStrafeTimeElapsed += fTimeElapsed;
 	if (MoveStrafeTimeElapsed < MoveStrafeDuration) {
-		MoveForward(-MovingSpeed * fTimeElapsed);
+		if(GetPosition().x<6000.0f&&GetPosition().x>500.f&&GetPosition().z>500.f&&GetPosition().z<6000.f)
+		MoveForward(MovingSpeed * fTimeElapsed);
 	}
 	else if (MoveStrafeTimeElapsed < 1.3 * MoveStrafeDuration)
 	{

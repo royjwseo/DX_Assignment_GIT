@@ -1442,8 +1442,12 @@ void CTankObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_ppTankObjects[i]->SetChild(pTankObject);
 		pTankObject->AddRef();
 		m_ppTankObjects[i]->SetOOBB(9.0, 6.0f, 19.0);
+		XMFLOAT3 xmf3RandomPosition{ uid2(dre),0,uid2(dre) };
 		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-		m_ppTankObjects[i]->SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f + 100 * i, 260.0f, pTerrain->GetLength() * 0.5f));
+		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+		int z = (int)(xmf3RandomPosition.z / xmf3Scale.z);
+		bool bReverseQuad = ((z % 2) != 0);
+		m_ppTankObjects[i]->SetPosition(xmf3RandomPosition.x, pTerrain->GetHeight(xmf3RandomPosition.x, xmf3RandomPosition.z, bReverseQuad), xmf3RandomPosition.z);
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingDuration(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetMovingSpeed(5.0f * (i + 1));
 		static_cast<CTankObject*>(m_ppTankObjects[i])->SetRotationSpeed(-0.5f * (i + 1));

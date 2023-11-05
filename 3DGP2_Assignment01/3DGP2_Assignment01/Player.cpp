@@ -518,6 +518,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	SetOOBB(9.0, 15.0f, 19.0);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	SetPosition(XMFLOAT3(pTerrain->GetWidth() * 0.5f, 255.0f, pTerrain->GetLength() * 0.5f));
+	Rotate(0.f, 180.f, 0.f);
 	SetPlayerUpdatedContext(pTerrain);
 	SetCameraUpdatedContext(pTerrain);
 

@@ -12,6 +12,7 @@
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
+#define POINT_ENEMY_LIGHT   4
 
 //const int OBJECTS_INDEX=0;
 const int BUILDING_INDEX = 0;
@@ -101,7 +102,10 @@ public:
 	void CheckRockByTankCollisions(float fTimeElapsed);
 	void CheckEnemyTankByBulletCollisions();
 
-	
+	void FindEnemyTankWithLight(float fTimeElapsed);
+	bool TurnLights = false;
+	float ElapsedTimeLightTurnOn = 0.f;
+	float DurationLightTime = 2.5f;
 
 	//void MoveObjectsInCircle(float fTimeElapsed);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

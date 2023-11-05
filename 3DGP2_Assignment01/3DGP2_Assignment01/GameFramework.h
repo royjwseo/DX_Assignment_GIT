@@ -97,10 +97,10 @@ private:
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
 	int m_nUIinterfaces = 0;
-	ID2D1Effect* m_pd2dfxBitmapSource[9];
-	ID2D1Effect* m_pd2dfxGaussianBlur[9];
-	ID2D1Effect* m_pd2dfxEdgeDetection[9];
-	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[9];
+	ID2D1Effect* m_pd2dfxBitmapSource[11];
+	ID2D1Effect* m_pd2dfxGaussianBlur[11];
+	ID2D1Effect* m_pd2dfxEdgeDetection[11];
+	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState[11];
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
 #endif
@@ -126,9 +126,14 @@ private:
 	float Score_x = 300.f;
 	float Score_y = 213.f;
 	//------
+	//บา UI
+	float ElapsedLightsOnTime = 0.f;
+
+	//---
 	float width_png = 0.f;
 
 	bool Get_Slowed = false;
+	float Acceleraion_factor = 0.f;
 
 	CGameTimer					m_GameTimer;
 

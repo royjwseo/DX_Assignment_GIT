@@ -5,6 +5,7 @@
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
+#define POINT_ENEMY_LIGHT   4
 
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
@@ -87,10 +88,43 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera
 			}
 		}
 		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
-
-		return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular)) * fAttenuationFactor);
+		return(float4(0.f, 0.f, 0.6f, 0.f));
+		//return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular)) * fAttenuationFactor);
 	}
 	return(float4(0.6f, 0.0f, 0.0f, 0.0f));
+}
+
+float4 PointLightToEnemy(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
+{
+	float3 vToLight = gLights[nIndex].m_vPosition - vPosition;
+	float fDistance = length(vToLight);
+	if (fDistance <= gLights[nIndex].m_fRange)
+	{
+		float fSpecularFactor = 0.0f;
+		vToLight /= fDistance;
+		float fDiffuseFactor = dot(vToLight, vNormal);
+		if (fDiffuseFactor > 0.0f)
+		{
+			if (gMaterial.m_cSpecular.a != 0.0f)
+			{
+#ifdef _WITH_REFLECT
+				float3 vReflect = reflect(-vToLight, vNormal);
+				fSpecularFactor = pow(max(dot(vReflect, vToCamera), 0.0f), gMaterial.m_cSpecular.a);
+#else
+#ifdef _WITH_LOCAL_VIEWER_HIGHLIGHTING
+				float3 vHalf = normalize(vToCamera + vToLight);
+#else
+				float3 vHalf = float3(0.0f, 1.0f, 0.0f);
+#endif
+				fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), gMaterial.m_cSpecular.a);
+#endif
+			}
+		}
+		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
+		return(float4(0.f, 0.f, 0.6f, 0.f));
+		//return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular)) * fAttenuationFactor);
+	}
+	return(float4(0.f, 0.0f, 0.0f, 0.0f));
 }
 
 float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
@@ -153,6 +187,10 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
+			}
+			else if (gLights[i].m_nType == POINT_ENEMY_LIGHT)
+			{
+				cColor += PointLightToEnemy(i, vPosition, vNormal, vToCamera);
 			}
 		}
 	}

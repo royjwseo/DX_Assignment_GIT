@@ -143,7 +143,7 @@ CScene::~CScene()
 
 void CScene::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 4;
+	m_nLights = 10;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
@@ -179,19 +179,18 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
-	m_pLights[3].m_bEnable = true;
-	m_pLights[3].m_nType = SPOT_LIGHT;
-	m_pLights[3].m_fRange = 300.0f;
-	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[3].m_xmf3Position = XMFLOAT3(50.0f, 50.0f, 30.0f);
-	m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[3].m_fFalloff = 8.0f;
-	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(30.0f));
-	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(15.0f));
+	for (int i = 3; i < 10; i++) {
+		m_pLights[i].m_bEnable = false;
+		m_pLights[i].m_nType = POINT_ENEMY_LIGHT;
+		m_pLights[i].m_fRange = 150.0f;
+		m_pLights[i].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+		m_pLights[i].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+		m_pLights[i].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+		m_pLights[i].m_xmf3Position = XMFLOAT3(3212.0f, 180.0f, 3212.0f);
+		m_pLights[i].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights[i].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
+	}
 
 
 }
@@ -820,9 +819,10 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = -0.15f;
 
 					break;
-				/*case 'J':
-					static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX])->FireBullet(NULL, 0);
-						break;*/
+				case 'R':
+					if(!TurnLights)
+					TurnLights = true;
+						break;
 				case 'S':
 
 					static_cast<CTankPlayer*>(m_pPlayer)->poshin_rotate_value = 0.15f;
@@ -1033,6 +1033,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CheckCactusByTankCollisions();
 		CheckRockByTankCollisions(fTimeElapsed);
 		CheckEnemyTankByBulletCollisions();
+		FindEnemyTankWithLight(fTimeElapsed);
 		//CheckObjectByBulletCollisions();
 	//	MoveObjectsInCircle(fTimeElapsed);
 		int cnt = 0;
@@ -1047,6 +1048,40 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		//죽은 탱크 개수를 토대로 UI바꾸기.
 	}
 }
+
+void CScene::FindEnemyTankWithLight(float fTimeElapsed) {
+	CTankObjectsShader* pEnemyTankShader = static_cast<CTankObjectsShader*>(m_ppShaders[ENEMYTANK_INDEX]);
+
+
+	if (TurnLights) {
+		for (int i = 3; i < m_nLights; i++) {
+			m_pLights[i].m_bEnable = true;
+		}
+		for (int i = 0; i < pEnemyTankShader->m_nTanks; i++) {
+			if (static_cast<CTankObject*>(pEnemyTankShader->m_ppTankObjects[i])->die) {
+				m_pLights[i+3].m_bEnable = false;
+
+			}
+			else{
+				m_pLights[i+3].m_xmf3Position = static_cast<CTankObject*>(pEnemyTankShader->m_ppTankObjects[i])->GetPosition();
+				
+			}
+		}
+		ElapsedTimeLightTurnOn += fTimeElapsed;
+		if (ElapsedTimeLightTurnOn > DurationLightTime) {
+			if (ElapsedTimeLightTurnOn > 5.0f) { 
+				ElapsedTimeLightTurnOn = 0.f;
+			TurnLights = false;
+			}
+			for (int i = 3; i < m_nLights; i++) {
+				m_pLights[i].m_bEnable = false;
+			}
+			
+
+		}
+	}
+}
+
 
 void CScene::CheckObjectByBulletCollisions() {
 
