@@ -255,7 +255,7 @@ void CGameFramework::CreateDirect2DDevice()
 	}
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	m_nUIinterfaces = 11;
+	m_nUIinterfaces = 12;
 	CoInitialize(NULL);
 	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
 	
@@ -458,6 +458,24 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[10]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[10]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[10]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/score.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[11]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[11]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[11]->SetInputEffect(0, m_pd2dfxBitmapSource[11]);
+
+	m_pd2dfxEdgeDetection[11]->SetInputEffect(0, m_pd2dfxBitmapSource[11]);
+	m_pd2dfxEdgeDetection[11]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[11]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[11]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[11]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[11]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
@@ -1047,6 +1065,7 @@ void CGameFramework::FrameAdvance()
 				ones_y = 1400.f;
 				tens_cnt++;
 				if (tens_cnt == 1) {
+				
 					tens_y = 0.f;
 					tens_x = 3600.f;
 				}
@@ -1168,16 +1187,58 @@ void CGameFramework::FrameAdvance()
 		D2D_POINT_2F d2dWinUI = {350, 0 };
 		D2D_RECT_F d2dRectWinUI = { 0, 0 , 1000,   473 }; // UI 农扁
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[7], &d2dWinUI, &d2dRectWinUI);
-
 	}
 	if (m_pScene->scene_Mode == SceneMode::End&&m_pScene->Lose) {
 		D2D_POINT_2F d2dLoseUI = { 400, 0 };
 		D2D_RECT_F d2dRectLoseUI = { 0, 0 , 900,   503 }; // UI 农扁
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[8], &d2dLoseUI, &d2dRectLoseUI);
-
 	}
-	
-
+	if (m_pScene->scene_Mode == SceneMode::End) {
+		scaleMatrix = D2D1::Matrix3x2F::Scale(0.5f, 0.5f);
+		m_pd2dDeviceContext->SetTransform(scaleMatrix);
+		D2D_POINT_2F d2dScoreUI = { 1850, 800 };
+		D2D_RECT_F d2dRectScoreUI = { 0, 0 , 510,   590 }; // UI 农扁
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[11], &d2dScoreUI, &d2dRectScoreUI);
+		float EndScore_x = 0.f;
+		float EndScore_y = 0.f;
+		switch (m_pScene->n_deadTank) {
+		case 0:
+			EndScore_x = 135.f;
+			EndScore_y = 426.f;
+			break;
+		case 1:
+			EndScore_x = 0.f;
+			EndScore_y = 0.f;
+			break;
+		case 2:
+			EndScore_x = 150.f;
+			EndScore_y = 0.f;
+			break;
+		case 3:
+			EndScore_x = 300.f;
+			EndScore_y = 0.f;
+			break;
+		case 4:
+			EndScore_x = 450.f;
+			EndScore_y = 0.f;
+			break;
+		case 5:
+			EndScore_x = 0.f;
+			EndScore_y = 213.f;
+			break;
+		case 6:
+			EndScore_x = 150.f;
+			EndScore_y = 213.f;
+			break;
+		case 7:
+			EndScore_x = 300.f;
+			EndScore_y = 213.f;
+			break;
+		}
+		D2D_POINT_2F d2dPointScoreNumUI = { 2030, 1000 };
+		D2D_RECT_F d2dRectScoreNumUI = { EndScore_x, EndScore_y , EndScore_x + 150.f,   EndScore_y + 213.f }; // UI 农扁
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[3], &d2dPointScoreNumUI, &d2dRectScoreNumUI);
+	}
 
 
 	

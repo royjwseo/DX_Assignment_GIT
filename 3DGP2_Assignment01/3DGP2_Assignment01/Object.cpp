@@ -1576,6 +1576,7 @@ CTankObject::~CTankObject() {
 void CTankObject::Update(float fTimeElapsed)
 {
 	//if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
+	if(!hitByBullet)
 	MoveRandom(fTimeElapsed);
 
 	RotateWheels(fTimeElapsed);
