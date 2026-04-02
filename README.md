@@ -11,6 +11,7 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 
 렌더링 파이프라인 설정, HLSL 셰이더 작성, 충돌 처리, UI까지 외부 3D 엔진 없이 C++과 DirectX 12로 직접 구현했습니다.  
 게임 목표는 3분 안에 맵 곳곳에 배치된 적 탱크 7대를 모두 격파하는 것입니다.
+<img width="940" height="702" alt="image" src="https://github.com/user-attachments/assets/47117894-e2da-47bf-b483-0db83191a7e9" />
 
 ---
 
