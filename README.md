@@ -11,7 +11,8 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 
 렌더링 파이프라인 설정, HLSL 셰이더 작성, 충돌 처리, UI까지 외부 3D 엔진 없이 C++과 DirectX 12로 직접 구현했습니다.  
 게임 목표는 3분 안에 맵 곳곳에 배치된 적 탱크 7대를 모두 격파하는 것입니다.
-<img width="940" height="702" alt="image" src="https://github.com/user-attachments/assets/47117894-e2da-47bf-b483-0db83191a7e9" />
+<img width="664" height="496" alt="image" src="https://github.com/user-attachments/assets/73dc5591-2e7f-4fd8-8048-0a1808fcbd54" />
+
 
 ---
 
@@ -94,6 +95,8 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 - 진흙 상태에서는 이동 속도 감소, 가속 불가
 - 일반 상태에서는 Shift로 가속 이동 가능
 - 탱크는 미사일 1발에 격파됩니다
+<img width="940" height="417" alt="image" src="https://github.com/user-attachments/assets/4e75c045-54cf-4b44-bed3-f8859cbdf2ad" />
+<img width="940" height="429" alt="image" src="https://github.com/user-attachments/assets/ced3063f-ea8f-457f-a55c-4ba613abf4bc" />
 
 ---
 
@@ -104,6 +107,7 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 하이트맵으로 지형 메쉬를 생성했습니다.  
 알파맵을 이용해 Base, Detail 텍스처를 혼합하는 다중 텍스처 블렌딩 방식을 사용했고, 법선 벡터를 계산해 조명 계산이 가능하도록 했습니다.  
 셰이더에서 타이머 값을 받아 진흙/잔디 텍스처가 10초 간격으로 자동 전환됩니다.
+<img width="638" height="382" alt="image" src="https://github.com/user-attachments/assets/63c2819b-d328-42a9-b70e-761c02826a0e" />
 
 ---
 
@@ -112,6 +116,8 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 큐브 메쉬에 큐브 텍스처를 입히는 방식입니다.  
 DirectX Texture Tool로 ±X, ±Y, ±Z 6면 이미지를 직접 하나의 DDS 큐브맵 파일로 제작했습니다.  
 깊이값의 영향을 받지 않도록 Depth 테스트를 비활성화했습니다.
+<img width="856" height="443" alt="image" src="https://github.com/user-attachments/assets/6efb9a80-58ee-4891-b826-8d4994de14e6" />
+<img width="940" height="414" alt="image" src="https://github.com/user-attachments/assets/ccb5e774-d7a2-4433-85a4-b4b46bee1bf9" />
 
 ---
 
@@ -124,6 +130,7 @@ DirectX Texture Tool로 ±X, ±Y, ±Z 6면 이미지를 직접 하나의 DDS 큐
 
 알파 블렌딩으로 반투명 처리를 했고, 올바른 색상 혼합을 위해 불투명 오브젝트를 먼저 렌더링한 뒤 물을 그립니다.  
 물에 진입하면 중력이 0이 되어 상하로 부유하는 애니메이션이 재생됩니다.
+<img width="771" height="455" alt="image" src="https://github.com/user-attachments/assets/20e30041-5739-4498-9717-308964253f3f" />
 
 ---
 
@@ -131,12 +138,15 @@ DirectX Texture Tool로 ±X, ±Y, ±Z 6면 이미지를 직접 하나의 DDS 큐
 
 Unity에서 T90LP 탱크 모델을 추출했습니다.  
 Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 적용했습니다.
-
+<img width="940" height="327" alt="image" src="https://github.com/user-attachments/assets/6ebdfb7b-3626-4cc8-aad4-20e325ce0c05" />
 `FindFrame`으로 바퀴 16개, 터렛, 포신을 개별 오브젝트로 분리해 독립적으로 움직이도록 구성했습니다.
-
+<img width="296" height="331" alt="image" src="https://github.com/user-attachments/assets/420352f7-611a-42e6-b5ef-d6afdf208412" />
 미사일이 포신 방향으로 날아가도록, 포신의 Up/Look 벡터를 외적해 Right 벡터를 구하고 변환 행렬을 만들어 미사일 월드 행렬에 반영했습니다.
 
 카메라는 4가지 모드를 지원하며, 단발 모드에서는 발사 후 카메라가 미사일을 추적합니다. 명중 시 2초간 줌인 상태로 고정됩니다.
+
+
+<img width="483" height="302" alt="image" src="https://github.com/user-attachments/assets/de9ec979-c93a-4821-a2cf-3e9eff0d3ade" />
 
 ---
 
@@ -147,6 +157,7 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 
 플레이어와 달리 **지형 경사에 따라 차체가 기울어집니다.**  
 현재 Up 벡터와 지형 법선 벡터 사이의 각도를 구해 회전축과 회전량을 계산하고, 선형 보간으로 부드럽게 기울기를 적용했습니다.
+<img width="838" height="568" alt="image" src="https://github.com/user-attachments/assets/e83b5e02-9b5d-441d-a4be-0c85cdf4612c" />
 
 ---
 
@@ -156,23 +167,28 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 - Unity에서 1x1x1 큐브를 기준으로 각 오브젝트의 충돌 범위를 측정해 설정했습니다  
 - 돌은 계속 밀면 밀려나고, 선인장은 밟으면 납작해지는 애니메이션이 재생됩니다  
 - 미사일은 지형 높이 아래로 내려가거나 사거리를 초과하면 초기화됩니다
-
+<img width="460" height="250" alt="image" src="https://github.com/user-attachments/assets/270cb8e4-22e6-4b83-80fd-73235488441c" />
 ---
+
 
 ### 스프라이트 애니메이션
 
 8x8 프레임 구성의 폭발 스프라이트 시트를 사용합니다.  
 텍스처 행렬을 상수 버퍼로 셰이더에 전달하고, 픽셀 셰이더에서 UV 오프셋을 계산해 프레임을 순서대로 재생합니다.  
 적 피격 시 3가지 폭발 스프라이트가 동시에 활성화됩니다.
+<img width="503" height="342" alt="image" src="https://github.com/user-attachments/assets/62079437-6c0b-4b44-be46-dd6286f24032" />
 
 ---
 
 ### 나무 / 건물 / 기타 오브젝트
 
 - 나무 40개(단일 30 + 묶음 10), 물 영역을 제외한 랜덤 위치에 배치
+- <img width="633" height="375" alt="image" src="https://github.com/user-attachments/assets/e8952d63-635a-49f3-9700-3e141acae58e" />
+
 - 알파 블렌딩 + AlphaToCoverage로 잎사귀 경계를 자연스럽게 처리
 - 건물 20개, 굴곡이 심한 지형은 피해서 배치 (주변 높이 차이 검사 함수 사용)
 - WindMill 건물은 날개가 자동으로 회전
+<img width="258" height="174" alt="image" src="https://github.com/user-attachments/assets/4d29409c-cc14-4ef6-a895-0ee820e9f892" />
 
 ---
 
@@ -186,6 +202,7 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 | Point Enemy Light (커스텀) | R키 입력 시 적 주변을 파란 영역으로 시각화 |
 
 ---
+<img width="631" height="298" alt="image" src="https://github.com/user-attachments/assets/27d57dfb-30fb-42e8-994d-e77b9eaf37b8" />
 
 ### UI
 
@@ -196,6 +213,8 @@ Direct2D11on12 방식으로 DirectX 12 위에 2D UI를 렌더링했습니다.
 - 시작 씬 / 인게임 / 엔딩 씬마다 별도 UI가 구성되어 있습니다
 
 ---
+<img width="334" height="151" alt="image" src="https://github.com/user-attachments/assets/82b1b66e-f19d-4e73-bdef-7d2803be8df0" />
+<img width="940" height="736" alt="image" src="https://github.com/user-attachments/assets/4ade57f8-d5c3-4224-90a6-31dfcbd08dc4" />
 
 ### 사운드
 
@@ -203,6 +222,7 @@ FMOD 라이브러리를 사용했습니다.
 폭발 효과음은 루프 방식으로 관리하되, WAV 파일을 2.5초로 편집해 매 피격 시 처음부터 깔끔하게 재생되도록 처리했습니다.
 
 ---
+<img width="940" height="274" alt="image" src="https://github.com/user-attachments/assets/79261581-fc56-4aaf-9274-845ecd9ae3a3" />
 
 ### 렌더링 구조
 
