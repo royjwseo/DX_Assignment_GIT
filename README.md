@@ -1,18 +1,29 @@
 # DirectX 12 3D Tank Shooting Game
 
-> 3D 게임프로그래밍2 과제 #01  
-> 2019184016 서정원
+<div align="center">
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/TankGameTitle.png" width="520"/>
+  <br><br>
+  <strong>3D 게임프로그래밍2 과제 #01 &nbsp;|&nbsp; 2019184016 서정원</strong>
+</div>
 
 ---
 
 ## 프로젝트 소개
 
+<img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/TankImage.png" align="right" width="130"/>
+
 DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 
 렌더링 파이프라인 설정, HLSL 셰이더 작성, 충돌 처리, UI까지 외부 3D 엔진 없이 C++과 DirectX 12로 직접 구현했습니다.  
+<<<<<<< Updated upstream
 게임 목표는 3분 안에 맵 곳곳에 배치된 적 탱크 7대를 모두 격파하는 것입니다.
 <img width="664" height="496" alt="image" src="https://github.com/user-attachments/assets/73dc5591-2e7f-4fd8-8048-0a1808fcbd54" />
 
+=======
+게임 목표는 **3분 안에 맵 곳곳에 배치된 적 탱크 7대를 모두 격파**하는 것입니다.
+
+<br clear="right"/>
+>>>>>>> Stashed changes
 
 ---
 
@@ -68,17 +79,27 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 
 **전투 및 기능**
 
-| 키 | 동작 |
-|----|------|
-| Space | 발사 |
-| Q | 단발 모드 (발사 시 카메라가 미사일 추적) |
-| E | 연발 모드 (0.3초 간격 연속 발사) |
-| R | 적 위치 탐지 — 2.5초간 파란 조명 표시, 쿨타임 5초 |
-| F | 조준점 모드 변경 (3가지 순환) |
+| 키 | 아이콘 | 동작 |
+|----|--------|------|
+| Space | | 발사 |
+| Q | <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/pistolmode.png" width="28"/> | 단발 모드 — 발사 시 카메라가 미사일 추적 |
+| E | <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/machinegun.png" width="28"/> | 연발 모드 — 0.3초 간격 연속 발사 |
+| R | <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/LightOn.png" width="28"/> | 적 위치 탐지 — 2.5초간 파란 조명 표시, 쿨타임 5초 |
+| F | | 조준점 모드 변경 (3가지 순환) |
 
 ---
 
 ## 게임 흐름
+
+<div align="center">
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/StartButton.png" height="70"/>
+  &nbsp;&nbsp;&nbsp;→&nbsp;&nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/Win.png" height="70"/>
+  &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/Lose.png" height="70"/>
+</div>
+
+<br>
 
 ```
 시작 화면 (Space 입력)
@@ -104,10 +125,19 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 
 ### 지형
 
+<img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/HeightMap.png" align="right" width="140"/>
+
 하이트맵으로 지형 메쉬를 생성했습니다.  
 알파맵을 이용해 Base, Detail 텍스처를 혼합하는 다중 텍스처 블렌딩 방식을 사용했고, 법선 벡터를 계산해 조명 계산이 가능하도록 했습니다.  
 셰이더에서 타이머 값을 받아 진흙/잔디 텍스처가 10초 간격으로 자동 전환됩니다.
 <img width="638" height="382" alt="image" src="https://github.com/user-attachments/assets/63c2819b-d328-42a9-b70e-761c02826a0e" />
+
+<br clear="right"/>
+
+| 파일 | 용도 |
+|------|------|
+| <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/HeightMap.png" width="60"/> HeightMap | 지형 높이 정보 |
+| <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/ObjectsMap.jpg" width="60"/> ObjectsMap | 오브젝트 배치 영역 마스크 |
 
 ---
 
@@ -205,6 +235,19 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 <img width="631" height="298" alt="image" src="https://github.com/user-attachments/assets/27d57dfb-30fb-42e8-994d-e77b9eaf37b8" />
 
 ### UI
+
+<div align="center">
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/score.png" width="70"/>
+  &nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/Digital_Num2.png" width="110"/>
+  &nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/LightOn.png" width="55"/>
+  &nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/pistolmode.png" width="55"/>
+  &nbsp;&nbsp;
+  <img src="3DGP2_Assignment01/3DGP2_Assignment01/Image/machinegun.png" width="55"/>
+</div>
+<br>
 
 Direct2D11on12 방식으로 DirectX 12 위에 2D UI를 렌더링했습니다.
 
