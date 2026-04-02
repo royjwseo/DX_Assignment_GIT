@@ -122,8 +122,8 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 <br clear="right"/>
 
 <div align="center">
-  <img src="media/image100.png" width="49%" title="잔디 상태"/>
-  <img src="media/image2.png" width="49%" title="진흙 상태"/>
+  <img src="media/image20.png" width="49%" title="잔디 상태"/>
+  <img src="media/image21.png" width="49%" title="진흙 상태"/>
   <br>
   <sub>잔디 상태 (일반) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 진흙 상태 (10초 전환)</sub>
 </div>
@@ -143,12 +143,7 @@ DirectX 12를 직접 다루며 구현한 3D 탱크 슈팅 게임입니다.
 DirectX Texture Tool로 ±X, ±Y, ±Z 6면 이미지를 직접 하나의 DDS 큐브맵 파일로 제작했습니다.  
 깊이값의 영향을 받지 않도록 Depth 테스트를 비활성화했습니다.
 
-<div align="center">
-  <img src="media/image27.png" width="49%" title="낮 스카이박스"/>
-  <img src="media/image24.png" width="49%" title="밤 스카이박스"/>
-  <br>
-  <sub>낮 스카이박스 (포신 시점) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 밤 스카이박스</sub>
-</div>
+<img width="940" height="414" alt="image" src="https://github.com/user-attachments/assets/3cdd701e-6771-4e96-94a8-507b44c46796" />
 
 ---
 
@@ -162,12 +157,8 @@ DirectX Texture Tool로 ±X, ±Y, ±Z 6면 이미지를 직접 하나의 DDS 큐
 알파 블렌딩으로 반투명 처리를 했고, 올바른 색상 혼합을 위해 불투명 오브젝트를 먼저 렌더링한 뒤 물을 그립니다.  
 물에 진입하면 중력이 0이 되어 상하로 부유하는 애니메이션이 재생됩니다.
 
-<div align="center">
-  <img src="media/image3.png" width="49%" title="TerrainWater — 흐르는 강"/>
-  <img src="media/image60.png" width="49%" title="RippleWater — 출렁이는 바다"/>
-  <br>
-  <sub>TerrainWater — UV 이동으로 흐르는 강 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RippleWater — sin/cos로 출렁이는 바다</sub>
-</div>
+<img width="771" height="455" alt="image" src="https://github.com/user-attachments/assets/6b879141-5be8-4dea-834c-08830b2599ae" />
+
 
 ---
 
@@ -198,8 +189,8 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 현재 Up 벡터와 지형 법선 벡터 사이의 각도를 구해 회전축과 회전량을 계산하고, 선형 보간으로 부드럽게 기울기를 적용했습니다.
 
 <div align="center">
-  <img src="media/image36.png" width="35%"/>
-  <img src="media/image4.png" width="62%"/>
+  <img src="media/image92.png" width="35%"/>
+  <img src="media/image91.png" width="62%"/>
   <br>
   <sub>경사에 따라 기울어지는 적 탱크 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R키 — 적 위치 파란 조명으로 탐지</sub>
 </div>
@@ -240,7 +231,7 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 
 <div align="center">
   <img src="media/image66.png" width="62%"/>
-  <img src="media/image40.png" width="22%"/>
+  <img src="media/image38.png" width="22%"/>
   <br>
   <sub>WindMill · 물 · 지형이 함께 보이는 인게임 장면 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unity에서 추출한 WindMill 모델</sub>
 </div>
@@ -258,7 +249,7 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 
 <div align="center">
   <img src="media/image19.png" width="38%"/>
-  <img src="media/image11.png" width="59%"/>
+  <img src="media/image89.png" width="59%"/>
   <br>
   <sub>Spot Light — 포신 앞 방향 조명 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Point Light — 엔딩 씬 연출</sub>
 </div>
