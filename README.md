@@ -190,7 +190,7 @@ Albedo, Normal, Height, Metalic, Occlusion 텍스처를 DDS로 변환해 각각 
 
 <div align="center">
   <img src="media/image92.png" width="35%"/>
-  <img src="media/image91.png" width="62%"/>
+  <img src="media/image4.png" width="62%"/>
   <br>
   <sub>경사에 따라 기울어지는 적 탱크 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R키 — 적 위치 파란 조명으로 탐지</sub>
 </div>
